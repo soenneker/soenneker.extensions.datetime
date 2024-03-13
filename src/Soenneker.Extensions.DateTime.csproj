@@ -42,6 +42,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Soenneker.Enums.DateTimePrecision" Version="2.1.175" />
+      <PackageReference Include="Soenneker.Enums.DateTimePrecision" Version="2.1.176" />
     </ItemGroup>
 </Project>
