@@ -82,22 +82,109 @@ public static class DateTimeExtension
     /// </remarks>
     /// <param name="dateTime">The <see cref="System.DateTime"/> to trim.</param>
     /// <param name="precision">The precision to which the <paramref name="dateTime"/> should be trimmed. This should be one of the values defined in <see cref="DateTimePrecision"/>.</param>
-    /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="precision"/>, with <see cref="System.DateTime.Kind"/> set to <see cref="DateTimeKind.Utc"/>.</returns>
+    /// <param name="dateTimeKind"></param>
+    /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="precision"/>.</returns>
     [Pure]
-    public static System.DateTime Trim(this System.DateTime dateTime, DateTimePrecision precision)
+    public static System.DateTime Trim(this System.DateTime dateTime, DateTimePrecision precision, DateTimeKind? dateTimeKind = null)
     {
-        System.DateTime trimmed = precision.Name switch
+        System.DateTime trimmed;
+
+        dateTimeKind ??= dateTime.Kind;
+
+        switch (precision.Name)
         {
-            nameof(DateTimePrecision.Second) => new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second),
-            nameof(DateTimePrecision.Minute) => new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0),
-            nameof(DateTimePrecision.Hour) => new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0),
-            nameof(DateTimePrecision.Day) => new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0),
-            nameof(DateTimePrecision.Month) => new System.DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0),
-            nameof(DateTimePrecision.Year) => new System.DateTime(dateTime.Year, 1, 1, 0, 0, 0),
-            _ => dateTime
+            case nameof(DateTimePrecision.Microsecond):
+                long truncatedTicks = dateTime.Ticks - dateTime.Ticks % 10;
+                trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
+                break;
+            case nameof(DateTimePrecision.Millisecond):
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Second):
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, 0, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Minute):
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, 0, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Hour):
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, 0, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Day):
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Month):
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Quarter):
+                // Determine the start month of the quarter
+                int quarterNumber = (dateTime.Month - 1) / 3;
+                int startMonthOfQuarter = quarterNumber * 3 + 1;
+                trimmed = new System.DateTime(dateTime.Year, startMonthOfQuarter, 1, 0, 0, 0, 0, 0, dateTime.Kind);
+                break;
+            case nameof(DateTimePrecision.Year):
+                trimmed = new System.DateTime(dateTime.Year, 1, 1, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                break;
+            case nameof(DateTimePrecision.Decade):
+                // Calculate the start year of the decade
+                int startYearOfDecade = dateTime.Year - dateTime.Year % 10;
+                trimmed = new System.DateTime(startYearOfDecade, 1, 1, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported precision: {precision.Name}");
+        }
+
+        return trimmed;
+    }
+
+    /// <summary>
+    /// Adjusts the provided <see cref="System.DateTime"/> object to the end of the specified period, minus one tick.
+    /// </summary>
+    /// <param name="dateTime">The date and time value to adjust.</param>
+    /// <param name="precision">The precision level to which the date and time should be adjusted. This determines the period (e.g., Year, Month, Day, etc.) to which the <paramref name="dateTime"/> will be trimmed.</param>
+    /// <param name="dateTimeKind">Optional. Specifies the kind of date and time adjustment. If not provided, the kind of <paramref name="dateTime"/> will be used. This can influence the handling of time zones.</param>
+    /// <returns>
+    /// A new <see cref="System.DateTime"/> object representing the last moment of the specified period, just before it transitions to the next period, according to the specified <paramref name="precision"/>.
+    /// </returns>
+    /// <remarks>
+    /// This method first calculates the start of the next period based on the specified <paramref name="precision"/> and <paramref name="dateTimeKind"/>, if provided. It then subtracts one tick from this calculated start time to get the precise end of the current period.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if an unsupported <paramref name="precision"/> is provided.</exception>
+    [Pure]
+    public static System.DateTime TrimEnd(this System.DateTime dateTime, DateTimePrecision precision, DateTimeKind? dateTimeKind = null)
+    {
+        System.DateTime startOfPeriod = dateTime.Trim(precision, dateTimeKind);
+
+        startOfPeriod = precision.Name switch
+        {
+            nameof(DateTimePrecision.Microsecond) => startOfPeriod.AddTicks(10), // Add 10 ticks to move to the start of the next microsecond
+            nameof(DateTimePrecision.Millisecond) => startOfPeriod.AddMilliseconds(1),
+            nameof(DateTimePrecision.Second) => startOfPeriod.AddSeconds(1),
+            nameof(DateTimePrecision.Minute) => startOfPeriod.AddMinutes(1),
+            nameof(DateTimePrecision.Hour) => startOfPeriod.AddHours(1),
+            nameof(DateTimePrecision.Day) => startOfPeriod.AddDays(1),
+            nameof(DateTimePrecision.Month) => startOfPeriod.AddMonths(1),
+            nameof(DateTimePrecision.Quarter) => startOfPeriod.AddMonths(3), // Quarters consist of 3 months
+            nameof(DateTimePrecision.Year) => startOfPeriod.AddYears(1),
+            nameof(DateTimePrecision.Decade) => startOfPeriod.AddYears(10),
+            _ => throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported precision: {precision.Name}")
         };
 
-        return trimmed.ToUtcKind();
+        // Subtract one tick to get the last moment of the current period
+        return startOfPeriod.AddTicks(-1);
+    }
+
+    /// <inheritdoc cref="Trim(System.DateTime, DateTimePrecision, DateTimeKind?)"/>
+    [Pure]
+    public static System.DateTime ToStartOf(this System.DateTime dateTime, DateTimePrecision dateTimePrecision, DateTimeKind? dateTimeKind = null)
+    {
+        return Trim(dateTime, dateTimePrecision, dateTimeKind);
+    }
+
+    /// <inheritdoc cref="TrimEnd(System.DateTime, DateTimePrecision, DateTimeKind?)"/>
+    [Pure]
+    public static System.DateTime ToEndOf(this System.DateTime dateTime, DateTimePrecision dateTimePrecision, DateTimeKind? dateTimeKind = null)
+    {
+        return TrimEnd(dateTime, dateTimePrecision, dateTimeKind);
     }
 
     /// <summary>
@@ -158,6 +245,14 @@ public static class DateTimeExtension
     public static bool IsWithinRange(this System.DateTime dateTime, System.DateTime startAt, System.DateTime endAt)
     {
         bool result = dateTime >= startAt && dateTime <= endAt;
+        return result;
+    }
+
+    [Pure]
+    public static int ToDateInteger(this System.DateTime dateTime)
+    {
+        var str = dateTime.ToString("yyyyMMdd");
+        int result = int.Parse(str);
         return result;
     }
 }
