@@ -10,18 +10,56 @@ namespace Soenneker.Extensions.DateTime;
 public static class DateTimeExtension
 {
     /// <summary>
+    /// Converts a UTC <see cref="DateTime"/> to the specified time zone and then adjusts the result to UTC.
+    /// </summary>
+    /// <param name="utcTime">The UTC date and time to convert. Ensure this is correctly specified as UTC to avoid unintended results.</param>
+    /// <param name="tzInfo">The target <see cref="TimeZoneInfo"/> representing the time zone to convert <paramref name="utcTime"/> into.</param>
+    /// <returns>A <see cref="System.DateTime"/> instance representing the converted time, with the <see cref="System.DateTime.Kind"/> property set to <see cref="DateTimeKind.Utc"/>. 
+    /// The time represented is the equivalent time in the specified time zone, but marked as UTC.</returns>
+    /// <remarks>
+    /// This method is intended for scenarios where a UTC time needs to be converted to a specific time zone and then treated as if the converted time is in UTC.
+    /// This could be useful for displaying times in a uniform format while accounting for different time zones.
+    /// Note that the returned <see cref="DateTime"/> does not represent the original UTC time but its equivalent in the specified time zone, marked as UTC.
+    /// </remarks>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="tzInfo"/> is null.</exception>
+    [Pure]
+    public static System.DateTime ToTz(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
+    {
+        System.DateTime converted = System.TimeZoneInfo.ConvertTimeFromUtc(utcTime, tzInfo);
+
+        System.DateTime result = converted.ToUtcKind();
+
+        return result;
+    }
+
+    /// <summary>
+    /// Will not care about specification; converts into Unspecified prior to UTC
+    /// </summary>
+    /// <returns>DateTime with DateTimeKind.Utc</returns>
+    [Pure]
+    public static System.DateTime ToUtc(this System.DateTime tzTime, System.TimeZoneInfo tzInfo)
+    {
+        if (tzTime.Kind != DateTimeKind.Unspecified) // Q: Is it more expensive to check or just set it?
+            tzTime = tzTime.ToUtcKind();
+
+        System.DateTime result = System.TimeZoneInfo.ConvertTimeToUtc(tzTime, tzInfo);
+
+        return result;
+    }
+
+    /// <summary>
     /// Calculates the age in hours between the specified date and the current date and time.
     /// </summary>
     /// <param name="fromDateTime">The specified date and time.</param>
     /// <param name="dateTimePrecision"></param>
-    /// <param name="utc">The current date and time in UTC. If not provided, the current UTC date and time will be used.</param>
+    /// <param name="utcNow">The current date and time in UTC. If not provided, the current UTC date and time will be used.</param>
     /// <returns>The age in hours.</returns>
     /// <exception cref="NotSupportedException"></exception>
     [Pure]
-    public static double ToAge(this System.DateTime fromDateTime, DateTimePrecision dateTimePrecision, System.DateTime? utc = null)
+    public static double ToAge(this System.DateTime fromDateTime, DateTimePrecision dateTimePrecision, System.DateTime? utcNow = null)
     {
-        utc ??= System.DateTime.UtcNow;
-        TimeSpan timeSpan = (utc - fromDateTime).Value;
+        utcNow ??= System.DateTime.UtcNow;
+        TimeSpan timeSpan = (utcNow - fromDateTime).Value;
 
         return dateTimePrecision.Name switch
         {
@@ -40,11 +78,11 @@ public static class DateTimeExtension
     /// This method adjusts a <see cref="System.DateTime"/> object to the nearest lower value of the specified precision. For example, trimming to <see cref="DateTimePrecision.Minute"/> 
     /// will result in a <see cref="System.DateTime"/> object set to the beginning of the minute, with seconds and milliseconds set to zero.
     /// The method supports various levels of precision, such as Year, Month, Day, Hour, Minute, and Second. Any time components finer than the specified precision are set to zero.
-    /// The resulting <see cref="System.DateTime"/> is always returned with its <see cref="DateTime.Kind"/> property set to <see cref="DateTimeKind.Utc"/>.
+    /// The resulting <see cref="System.DateTime"/> is always returned with its <see cref="System.DateTime.Kind"/> property set to <see cref="DateTimeKind.Utc"/>.
     /// </remarks>
     /// <param name="dateTime">The <see cref="System.DateTime"/> to trim.</param>
     /// <param name="precision">The precision to which the <paramref name="dateTime"/> should be trimmed. This should be one of the values defined in <see cref="DateTimePrecision"/>.</param>
-    /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="precision"/>, with <see cref="DateTime.Kind"/> set to <see cref="DateTimeKind.Utc"/>.</returns>
+    /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="precision"/>, with <see cref="System.DateTime.Kind"/> set to <see cref="DateTimeKind.Utc"/>.</returns>
     [Pure]
     public static System.DateTime Trim(this System.DateTime dateTime, DateTimePrecision precision)
     {
@@ -63,23 +101,21 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Not typically for UI display, for admin/debug purposes
-    /// </summary>
-    /// <code>"yyyy-MM-ddTHH:mm:ss.fffffff"</code>
-    [Pure]
-    public static string ToPreciseDisplay(this System.DateTime dateTime)
-    {
-        var result = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffffff");
-        return result;
-    }
-
-    /// <summary>
-    /// Essentially wraps <see cref="DateTime.SpecifyKind"/> in extension method
+    /// Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method
     /// </summary>
     [Pure]
     public static System.DateTime ToUtcKind(this System.DateTime dateTime)
     {
         return System.DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+    }
+
+    /// <summary>
+    /// Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method
+    /// </summary>
+    [Pure]
+    public static System.DateTime ToUnspecifiedKind(this System.DateTime dateTime)
+    {
+        return System.DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified);
     }
 
     /// <summary>
@@ -112,18 +148,6 @@ public static class DateTimeExtension
     public static long ToUnixTimeSeconds(this System.DateTime utc)
     {
         long result = utc.ToDateTimeOffset().ToUnixTimeSeconds();
-        return result;
-    }
-
-    /// <summary>
-    /// yyyy-MM-ddTHH:mm:ss.fffZ. Can be used for Cosmos queries. ISO 8601
-    /// </summary>
-    /// <param name="utc">Needs to be UTC</param>
-    /// <code>"yyyy-MM-ddTHH:mm:ss.fffZ"</code>
-    [Pure]
-    public static string ToIso8601(this System.DateTime utc)
-    {
-        var result = utc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
         return result;
     }
 
