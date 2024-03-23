@@ -94,40 +94,45 @@ public static class DateTimeExtension
         switch (precision.Name)
         {
             case nameof(DateTimePrecision.Microsecond):
-                long truncatedTicks = dateTime.Ticks - dateTime.Ticks % 10;
-                trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
-                break;
+                {
+                    long truncatedTicks = dateTime.Ticks - dateTime.Ticks % 10;
+                    trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
+                    break;
+                }
             case nameof(DateTimePrecision.Millisecond):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, 0, dateTimeKind.Value);
-                break;
+                {
+                    long truncatedTicks = dateTime.Ticks - dateTime.Ticks % 10000;
+                    trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
+                    break;
+                }
             case nameof(DateTimePrecision.Second):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, 0, dateTimeKind.Value);
                 break;
             case nameof(DateTimePrecision.Minute):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, 0, dateTimeKind.Value);
                 break;
             case nameof(DateTimePrecision.Hour):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, 0, dateTimeKind.Value);
                 break;
             case nameof(DateTimePrecision.Day):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             case nameof(DateTimePrecision.Month):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             case nameof(DateTimePrecision.Quarter):
                 // Determine the start month of the quarter
                 int quarterNumber = (dateTime.Month - 1) / 3;
                 int startMonthOfQuarter = quarterNumber * 3 + 1;
-                trimmed = new System.DateTime(dateTime.Year, startMonthOfQuarter, 1, 0, 0, 0, 0, 0, dateTime.Kind);
+                trimmed = new System.DateTime(dateTime.Year, startMonthOfQuarter, 1, 0, 0, 0, 0, dateTime.Kind);
                 break;
             case nameof(DateTimePrecision.Year):
-                trimmed = new System.DateTime(dateTime.Year, 1, 1, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Year, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             case nameof(DateTimePrecision.Decade):
                 // Calculate the start year of the decade
                 int startYearOfDecade = dateTime.Year - dateTime.Year % 10;
-                trimmed = new System.DateTime(startYearOfDecade, 1, 1, 0, 0, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(startYearOfDecade, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported precision: {precision.Name}");
