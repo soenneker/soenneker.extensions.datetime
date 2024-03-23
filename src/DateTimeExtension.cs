@@ -33,9 +33,24 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Will not care about specification; converts into Unspecified prior to UTC
+    /// Converts a <see cref="System.DateTime"/> value to Coordinated Universal Time (UTC) from a specified time zone, treating the original DateTime's kind as Unspecified.
     /// </summary>
-    /// <returns>DateTime with DateTimeKind.Utc</returns>
+    /// <param name="tzTime">The <see cref="System.DateTime"/> to convert to UTC. If <see cref="DateTimeKind"/> is not Unspecified, it will be forcibly changed to Unspecified before conversion, ignoring the original time zone indication.</param>
+    /// <param name="tzInfo">The <see cref="System.TimeZoneInfo"/> representing the time zone of <paramref name="tzTime"/>. This is used to correctly calculate the UTC time, assuming <paramref name="tzTime"/> is in this specified time zone.</param>
+    /// <returns>A <see cref="System.DateTime"/> value that represents the same point in time as <paramref name="tzTime"/>, expressed in UTC. The <see cref="DateTimeKind"/> of the returned DateTime is always Utc.</returns>
+    /// <remarks>
+    /// This method is useful when you have a DateTime value with a specific time zone and need to convert it to UTC, but the source DateTime's kind property is not Unspecified. The method first forces the kind to Unspecified to avoid double conversions by the .NET runtime, ensuring the conversion uses the specified <paramref name="tzInfo"/> accurately.
+    /// Note: If the original <paramref name="tzTime"/> kind is Unspecified, it's directly used for conversion. It's recommended to explicitly manage DateTime kinds to prevent unintended behavior.
+    /// <example>
+    /// <code>
+    /// var localTime = new DateTime(2023, 1, 1, 12, 0, 0, DateTimeKind.Local);
+    /// var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+    /// var utcTime = localTime.ToUtc(timeZoneInfo);
+    /// Console.WriteLine(utcTime.Kind); // Outputs "Utc"
+    /// Console.WriteLine(utcTime); // Outputs the UTC equivalent of the Eastern Standard Time provided date and time
+    /// </code>
+    /// </example>
+    /// </remarks>
     [Pure]
     public static System.DateTime ToUtc(this System.DateTime tzTime, System.TimeZoneInfo tzInfo)
     {
@@ -244,17 +259,49 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Inclusive (returns true if datetime is equal to start or end)
+    /// Determines whether the specified <see cref="System.DateTime"/> value falls within a given date range, inclusive of the start and end dates.
     /// </summary>
+    /// <param name="dateTime">The <see cref="System.DateTime"/> instance to check.</param>
+    /// <param name="startAt">The start date of the range. The check is inclusive, meaning this date is considered part of the range.</param>
+    /// <param name="endAt">The end date of the range. The check is inclusive, meaning this date is considered part of the range.</param>
+    /// <returns><c>true</c> if <paramref name="dateTime"/> is equal to or falls between <paramref name="startAt"/> and <paramref name="endAt"/>; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// This method extends <see cref="System.DateTime"/> and can be used to easily determine if a date occurs within a specified range, including the boundaries.
+    /// <example>
+    /// <code>
+    /// var dateToCheck = new DateTime(2023, 3, 15);
+    /// var startDate = new DateTime(2023, 3, 1);
+    /// var endDate = new DateTime(2023, 3, 31);
+    /// bool isInMarch = dateToCheck.IsBetween(startDate, endDate);
+    /// Console.WriteLine(isInMarch); // Outputs "True"
+    /// </code>
+    /// </example>
+    /// </remarks>
     [Pure]
-    public static bool IsWithinRange(this System.DateTime dateTime, System.DateTime startAt, System.DateTime endAt)
+    public static bool IsBetween(this System.DateTime dateTime, System.DateTime startAt, System.DateTime endAt)
     {
         bool result = dateTime >= startAt && dateTime <= endAt;
         return result;
     }
 
+    /// <summary>
+    /// Converts a <see cref="System.DateTime"/> instance to an integer in the format yyyyMMdd.
+    /// </summary>
+    /// <param name="dateTime">The <see cref="System.DateTime"/> instance to convert.</param>
+    /// <returns>An integer representing the <paramref name="dateTime"/> in the format yyyyMMdd.</returns>
+    /// <exception cref="FormatException">Thrown when the conversion to the integer format fails, which should not occur with valid dates.</exception>
+    /// <remarks>
+    /// This method extends <see cref="System.DateTime"/> and allows for a compact representation of a date as an integer. This can be useful for comparisons, sorting, or storing dates in a condensed format.
+    /// <example>
+    /// <code>
+    /// var date = new DateTime(2023, 3, 15);
+    /// int dateInt = date.ToDateInteger();
+    /// Console.WriteLine(dateInt); // Outputs "20230315"
+    /// </code>
+    /// </example>
+    /// </remarks>
     [Pure]
-    public static int ToDateInteger(this System.DateTime dateTime)
+    public static int ToDateAsInteger(this System.DateTime dateTime)
     {
         var str = dateTime.ToString("yyyyMMdd");
         int result = int.Parse(str);
