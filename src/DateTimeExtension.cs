@@ -132,6 +132,17 @@ public static class DateTimeExtension
             case nameof(DateTimePrecision.Day):
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
+            case nameof(DateTimePrecision.Week): // Considering Monday is the first day - ISO 8601
+            {
+                int daysToSubtract = (int)dateTime.DayOfWeek - (int)DayOfWeek.Monday;
+                if (daysToSubtract < 0)
+                {
+                    daysToSubtract += 7;
+                }
+
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value).AddDays(-daysToSubtract);
+                break;
+            }
             case nameof(DateTimePrecision.Month):
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
@@ -182,6 +193,7 @@ public static class DateTimeExtension
             nameof(DateTimePrecision.Minute) => startOfPeriod.AddMinutes(1),
             nameof(DateTimePrecision.Hour) => startOfPeriod.AddHours(1),
             nameof(DateTimePrecision.Day) => startOfPeriod.AddDays(1),
+            nameof(DateTimePrecision.Week) => startOfPeriod.AddDays(7),
             nameof(DateTimePrecision.Month) => startOfPeriod.AddMonths(1),
             nameof(DateTimePrecision.Quarter) => startOfPeriod.AddMonths(3), // Quarters consist of 3 months
             nameof(DateTimePrecision.Year) => startOfPeriod.AddYears(1),
