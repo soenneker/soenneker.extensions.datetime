@@ -355,4 +355,49 @@ public static class DateTimeExtension
         TimeSpan result = timeZoneInfo.GetUtcOffset(utcNow.ToTz(timeZoneInfo));
         return result;
     }
+
+    /// <summary>
+    /// Converts a specific hour in a given time zone to its corresponding hour in UTC.
+    /// </summary>
+    /// <remarks>
+    /// This method calculates the UTC equivalent of a specified hour in a given time zone, considering the time zone's offset from UTC, including any daylight saving time adjustments.
+    /// It is designed to handle time zone differences and daylight saving time, ensuring that the conversion always produces a valid hour in the 24-hour format.
+    /// Special Case: Due to the modulo operation, a conversion can result in 24, which represents midnight at the start of a new day.
+    /// </remarks>
+    /// <param name="utcNow">The current UTC date and time, used to determine the time zone's current offset, including daylight saving time.</param>
+    /// <param name="tzHour">The hour in the specified time zone to be converted to UTC. Must be in 24-hour format.</param>
+    /// <param name="timeZoneInfo">The time zone of the original hour.</param>
+    /// <returns>The hour in UTC after conversion. This is always a positive number in the 24-hour format, where 24 may indicate midnight.</returns>
+    [Pure]
+    public static int ConvertTzHourToUtc(this System.DateTime utcNow, int tzHour, System.TimeZoneInfo timeZoneInfo)
+    {
+        int utcHoursOffset = utcNow.GetTzOffsetAsHours(timeZoneInfo);
+        int utcHour = (tzHour - utcHoursOffset) % 24;
+        return utcHour;
+    }
+
+    /// <summary>
+    /// Converts a specific hour in UTC to its corresponding hour in the Eastern Time Zone.
+    /// </summary>
+    /// <remarks>
+    /// This method calculates the Eastern Time equivalent of a specified UTC hour, taking into account the Eastern Time Zone's offset from UTC, including any daylight saving time adjustments.
+    /// It correctly adjusts for negative results, ensuring the returned hour is always a positive number in the 24-hour format, suitable for representing times within a single day.
+    /// Special Case: While the method is designed to return positive hours, it can also return 24, which represents midnight at the start of a new day.
+    /// </remarks>
+    /// <param name="utcNow">The current UTC date and time, used to determine the Eastern Time Zone's current offset, including daylight saving time.</param>
+    /// <param name="utcHour">The hour in UTC to be converted to Eastern Time. Must be in 24-hour format.</param>
+    /// <param name="timeZoneInfo">The Eastern Time Zone information.</param>
+    /// <returns>The hour in Eastern Time after conversion. This is always a positive number in the 24-hour format, where 24 may indicate midnight.</returns>
+    [Pure]
+    public static int ConvertUtcHourToEastern(this System.DateTime utcNow, int utcHour, System.TimeZoneInfo timeZoneInfo)
+    {
+        int utcHoursOffset = utcNow.GetTzOffsetAsHours(timeZoneInfo);
+
+        int tzHour = utcHour + utcHoursOffset;
+
+        if (tzHour < 0)
+            tzHour += 24;
+
+        return tzHour;
+    }
 }
