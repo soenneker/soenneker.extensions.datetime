@@ -331,9 +331,9 @@ public static class DateTimeExtension
     /// <param name="timeZoneInfo">The time zone to calculate the offset against.</param>
     /// <returns>The time zone offset in hours from UTC. Time zones west of UTC return negative values. i.e. Eastern returns a negative value (-4, or -5)</returns>
     [Pure]
-    public static int GetTzOffsetAsHours(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
+    public static int ToTzOffsetHours(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
     {
-        int result = utcNow.GetTzOffset(timeZoneInfo).Hours;
+        int result = utcNow.ToTzOffset(timeZoneInfo).Hours;
         return result;
     }
 
@@ -350,7 +350,7 @@ public static class DateTimeExtension
     /// <param name="utcNow">The UTC date and time to calculate the offset for, or null to use the current UTC time.</param>
     /// <param name="timeZoneInfo">The time zone to calculate the offset for.</param>
     [Pure]
-    public static TimeSpan GetTzOffset(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
+    public static TimeSpan ToTzOffset(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
     {
         TimeSpan result = timeZoneInfo.GetUtcOffset(utcNow.ToTz(timeZoneInfo));
         return result;
@@ -369,9 +369,9 @@ public static class DateTimeExtension
     /// <param name="timeZoneInfo">The time zone of the original hour.</param>
     /// <returns>The hour in UTC after conversion. This is always a positive number in the 24-hour format, where 24 may indicate midnight.</returns>
     [Pure]
-    public static int ConvertTzHourToUtc(this System.DateTime utcNow, int tzHour, System.TimeZoneInfo timeZoneInfo)
+    public static int ToUtcHoursFromTz(this System.DateTime utcNow, int tzHour, System.TimeZoneInfo timeZoneInfo)
     {
-        int utcHoursOffset = utcNow.GetTzOffsetAsHours(timeZoneInfo);
+        int utcHoursOffset = utcNow.ToTzOffsetHours(timeZoneInfo);
         int utcHour = (tzHour - utcHoursOffset) % 24;
         return utcHour;
     }
@@ -389,9 +389,9 @@ public static class DateTimeExtension
     /// <param name="timeZoneInfo">The time zone to which the UTC hour will be converted.</param>
     /// <returns>The corresponding hour in the specified time zone, adjusted to a positive number in the 24-hour format. This can include returning 24 to indicate midnight.</returns>
     [Pure]
-    public static int ConvertUtcHourToTz(this System.DateTime utcNow, int utcHour, System.TimeZoneInfo timeZoneInfo)
+    public static int ToTzHoursFromUtc(this System.DateTime utcNow, int utcHour, System.TimeZoneInfo timeZoneInfo)
     {
-        int utcHoursOffset = utcNow.GetTzOffsetAsHours(timeZoneInfo);
+        int utcHoursOffset = utcNow.ToTzOffsetHours(timeZoneInfo);
 
         int tzHour = utcHour + utcHoursOffset;
 
