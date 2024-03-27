@@ -316,7 +316,43 @@ public static class DateTimeExtension
     public static int ToDateAsInteger(this System.DateTime dateTime)
     {
         var str = dateTime.ToString("yyyyMMdd");
-        int result = int.Parse(str);
+        return int.Parse(str);
+    }
+
+    /// <summary>
+    /// Calculates the whole hour part of the time zone offset for a given UTC date and time and a specified time zone.
+    /// </summary>
+    /// <remarks>
+    /// This method provides the time zone offset in hours for the specified UTC date and time, accounting for any applicable daylight saving time changes.
+    /// The offset is determined by first converting the UTC time to the target time zone and then calculating the offset from UTC.
+    /// It is designed to be timezone-aware, adjusting the result based on the time zone's rules for daylight saving time.
+    /// </remarks>
+    /// <param name="utcNow">The UTC date and time to calculate the offset for. If null, the current UTC time is used.</param>
+    /// <param name="timeZoneInfo">The time zone to calculate the offset against.</param>
+    /// <returns>The time zone offset in hours from UTC. Time zones west of UTC return negative values. i.e. Eastern returns a negative value (-4, or -5)</returns>
+    [Pure]
+    public static int GetTzOffsetAsHours(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
+    {
+        int result = utcNow.GetTzOffset(timeZoneInfo).Hours;
+        return result;
+    }
+
+    /// <summary>
+    /// Determines the time zone offset as a TimeSpan for a given UTC date and time in the specified time zone, considering daylight saving time.
+    /// </summary>
+    /// <remarks>
+    /// This method calculates the exact time zone offset, including minutes and seconds, for the specified UTC date and time.
+    /// It accounts for the time zone's daylight saving rules, which can cause the offset to vary throughout the year.
+    /// The method uses the provided <paramref name="timeZoneInfo"/> to convert the <paramref name="utcNow"/> to local time and then calculates the offset from UTC.
+    /// If <paramref name="utcNow"/> is null, the current UTC time is used for the calculation.
+    /// This is useful for applications needing precise time zone offset information, including minute adjustments for DST.
+    /// </remarks>
+    /// <param name="utcNow">The UTC date and time to calculate the offset for, or null to use the current UTC time.</param>
+    /// <param name="timeZoneInfo">The time zone to calculate the offset for.</param>
+    [Pure]
+    public static TimeSpan GetTzOffset(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
+    {
+        TimeSpan result = timeZoneInfo.GetUtcOffset(utcNow.ToTz(timeZoneInfo));
         return result;
     }
 }
