@@ -54,8 +54,7 @@ public static class DateTimeExtension
     [Pure]
     public static System.DateTime ToUtc(this System.DateTime tzTime, System.TimeZoneInfo tzInfo)
     {
-        if (tzTime.Kind != DateTimeKind.Unspecified)
-            tzTime = tzTime.ToUtcKind();
+        tzTime = tzTime.ToUnspecifiedKind();
 
         System.DateTime result = System.TimeZoneInfo.ConvertTimeToUtc(tzTime, tzInfo);
 
