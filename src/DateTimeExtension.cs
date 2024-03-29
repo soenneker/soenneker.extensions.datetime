@@ -78,10 +78,17 @@ public static class DateTimeExtension
 
         return unitOfTime.Name switch
         {
-            nameof(UnitOfTime.Day) => timeSpan.TotalDays,
-            nameof(UnitOfTime.Hour) => timeSpan.TotalHours,
-            nameof(UnitOfTime.Minute) => timeSpan.TotalMinutes,
+            nameof(UnitOfTime.Tick) => timeSpan.Ticks,
+            nameof(UnitOfTime.Microsecond) => timeSpan.Ticks / 10.0,
+            nameof(UnitOfTime.Millisecond) => timeSpan.TotalMilliseconds,
             nameof(UnitOfTime.Second) => timeSpan.TotalSeconds,
+            nameof(UnitOfTime.Minute) => timeSpan.TotalMinutes,
+            nameof(UnitOfTime.Hour) => timeSpan.TotalHours,
+            nameof(UnitOfTime.Day) => timeSpan.TotalDays,
+            nameof(UnitOfTime.Week) => timeSpan.TotalHours / 7D,
+            nameof(UnitOfTime.Month) => timeSpan.TotalDays / 30.44,
+            nameof(UnitOfTime.Quarter) => timeSpan.TotalDays / (365.25 / 4D),
+            nameof(UnitOfTime.Year) => timeSpan.TotalDays / 365.25,
             _ => throw new NotSupportedException("UnitOfTime is not supported for this method")
         };
     }
@@ -161,7 +168,7 @@ public static class DateTimeExtension
                 trimmed = new System.DateTime(startYearOfDecade, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported precision: {precision.Name}");
+                throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported UnitOfTime: {precision.Name}");
         }
 
         return trimmed;
@@ -198,7 +205,7 @@ public static class DateTimeExtension
             nameof(UnitOfTime.Quarter) => startOfPeriod.AddMonths(3), // Quarters consist of 3 months
             nameof(UnitOfTime.Year) => startOfPeriod.AddYears(1),
             nameof(UnitOfTime.Decade) => startOfPeriod.AddYears(10),
-            _ => throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported precision: {precision.Name}")
+            _ => throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported UnitOfTime: {precision.Name}")
         };
 
         // Subtract one tick to get the last moment of the current period
@@ -225,6 +232,9 @@ public static class DateTimeExtension
     [Pure]
     public static System.DateTime ToUtcKind(this System.DateTime dateTime)
     {
+        if (dateTime.Kind == DateTimeKind.Utc)
+            return dateTime;
+
         return System.DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
     }
 
@@ -234,6 +244,9 @@ public static class DateTimeExtension
     [Pure]
     public static System.DateTime ToUnspecifiedKind(this System.DateTime dateTime)
     {
+        if (dateTime.Kind == DateTimeKind.Unspecified)
+            return dateTime;
+
         return System.DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified);
     }
 
