@@ -1,4 +1,4 @@
-﻿using Soenneker.Enums.DateTimePrecision;
+﻿using Soenneker.Enums.UnitOfTime;
 using Soenneker.Tests.Unit;
 using Xunit;
 
@@ -11,6 +11,6 @@ public class DateTimeExtensionTests : UnitTest
     {
         System.DateTime utcNow = System.DateTime.UtcNow;
 
-        System.DateTime result = utcNow.Trim(DateTimePrecision.Minute);
+        System.DateTime result = utcNow.Trim(UnitOfTime.Minute);
     }
 }
