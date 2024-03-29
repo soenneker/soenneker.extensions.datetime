@@ -54,7 +54,7 @@ public static class DateTimeExtension
     [Pure]
     public static System.DateTime ToUtc(this System.DateTime tzTime, System.TimeZoneInfo tzInfo)
     {
-        if (tzTime.Kind != DateTimeKind.Unspecified) // Q: Is it more expensive to check or just set it?
+        if (tzTime.Kind != DateTimeKind.Unspecified)
             tzTime = tzTime.ToUtcKind();
 
         System.DateTime result = System.TimeZoneInfo.ConvertTimeToUtc(tzTime, tzInfo);

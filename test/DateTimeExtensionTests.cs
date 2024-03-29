@@ -1,4 +1,5 @@
-﻿using Soenneker.Enums.UnitOfTime;
+﻿using FluentAssertions;
+using Soenneker.Enums.UnitOfTime;
 using Soenneker.Tests.Unit;
 using Xunit;
 
@@ -12,5 +13,6 @@ public class DateTimeExtensionTests : UnitTest
         System.DateTime utcNow = System.DateTime.UtcNow;
 
         System.DateTime result = utcNow.Trim(UnitOfTime.Minute);
+        result.Kind.Should().Be(System.DateTimeKind.Utc);
     }
 }
