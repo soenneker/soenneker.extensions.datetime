@@ -9,6 +9,9 @@ namespace Soenneker.Extensions.DateTime;
 /// </summary>
 public static class DateTimeExtension
 {
+    private const double _ticksPerNanosecond = 100.0;
+    private const double _ticksPerMicrosecond = 10.0;
+
     /// <summary>
     /// Converts a UTC <see cref="DateTime"/> to the specified time zone and then adjusts the result to UTC.
     /// </summary>
@@ -78,7 +81,8 @@ public static class DateTimeExtension
         return unitOfTime.Name switch
         {
             nameof(UnitOfTime.Tick) => timeSpan.Ticks,
-            nameof(UnitOfTime.Microsecond) => timeSpan.Ticks / 10.0,
+            nameof(UnitOfTime.Nanosecond) => timeSpan.Ticks * _ticksPerNanosecond,
+            nameof(UnitOfTime.Microsecond) => timeSpan.Ticks / _ticksPerMicrosecond,
             nameof(UnitOfTime.Millisecond) => timeSpan.TotalMilliseconds,
             nameof(UnitOfTime.Second) => timeSpan.TotalSeconds,
             nameof(UnitOfTime.Minute) => timeSpan.TotalMinutes,
@@ -102,21 +106,21 @@ public static class DateTimeExtension
     /// The resulting <see cref="System.DateTime"/> is always returned with its <see cref="System.DateTime.Kind"/> property set to <see cref="DateTimeKind.Utc"/>.
     /// </remarks>
     /// <param name="dateTime">The <see cref="System.DateTime"/> to trim.</param>
-    /// <param name="precision">The precision to which the <paramref name="dateTime"/> should be trimmed. This should be one of the values defined in <see cref="UnitOfTime"/>.</param>
+    /// <param name="unitOfTime">The precision to which the <paramref name="dateTime"/> should be trimmed. This should be one of the values defined in <see cref="UnitOfTime"/>.</param>
     /// <param name="dateTimeKind"></param>
-    /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="precision"/>.</returns>
+    /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="unitOfTime"/>.</returns>
     [Pure]
-    public static System.DateTime Trim(this System.DateTime dateTime, UnitOfTime precision, DateTimeKind? dateTimeKind = null)
+    public static System.DateTime Trim(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
     {
         System.DateTime trimmed;
 
         dateTimeKind ??= dateTime.Kind;
 
-        switch (precision.Name)
+        switch (unitOfTime.Name)
         {
             case nameof(UnitOfTime.Microsecond):
                 {
-                    long truncatedTicks = dateTime.Ticks - dateTime.Ticks % 10;
+                    long truncatedTicks = dateTime.Ticks - dateTime.Ticks % (long)_ticksPerMicrosecond;
                     trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
                     break;
                 }
@@ -167,7 +171,7 @@ public static class DateTimeExtension
                 trimmed = new System.DateTime(startYearOfDecade, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported UnitOfTime: {precision.Name}");
+                throw new ArgumentOutOfRangeException(nameof(unitOfTime), $"Unsupported UnitOfTime: {unitOfTime.Name}");
         }
 
         return trimmed;
@@ -177,23 +181,23 @@ public static class DateTimeExtension
     /// Adjusts the provided <see cref="System.DateTime"/> object to the end of the specified period, minus one tick.
     /// </summary>
     /// <param name="dateTime">The date and time value to adjust.</param>
-    /// <param name="precision">The precision level to which the date and time should be adjusted. This determines the period (e.g., Year, Month, Day, etc.) to which the <paramref name="dateTime"/> will be trimmed.</param>
+    /// <param name="unitOfTime">The precision level to which the date and time should be adjusted. This determines the period (e.g., Year, Month, Day, etc.) to which the <paramref name="dateTime"/> will be trimmed.</param>
     /// <param name="dateTimeKind">Optional. Specifies the kind of date and time adjustment. If not provided, the kind of <paramref name="dateTime"/> will be used. This can influence the handling of time zones.</param>
     /// <returns>
-    /// A new <see cref="System.DateTime"/> object representing the last moment of the specified period, just before it transitions to the next period, according to the specified <paramref name="precision"/>.
+    /// A new <see cref="System.DateTime"/> object representing the last moment of the specified period, just before it transitions to the next period, according to the specified <paramref name="unitOfTime"/>.
     /// </returns>
     /// <remarks>
-    /// This method first calculates the start of the next period based on the specified <paramref name="precision"/> and <paramref name="dateTimeKind"/>, if provided. It then subtracts one tick from this calculated start time to get the precise end of the current period.
+    /// This method first calculates the start of the next period based on the specified <paramref name="unitOfTime"/> and <paramref name="dateTimeKind"/>, if provided. It then subtracts one tick from this calculated start time to get the precise end of the current period.
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if an unsupported <paramref name="precision"/> is provided.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if an unsupported <paramref name="unitOfTime"/> is provided.</exception>
     [Pure]
-    public static System.DateTime TrimEnd(this System.DateTime dateTime, UnitOfTime precision, DateTimeKind? dateTimeKind = null)
+    public static System.DateTime TrimEnd(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
     {
-        System.DateTime startOfPeriod = dateTime.Trim(precision, dateTimeKind);
+        System.DateTime startOfPeriod = dateTime.Trim(unitOfTime, dateTimeKind);
 
-        startOfPeriod = precision.Name switch
+        startOfPeriod = unitOfTime.Name switch
         {
-            nameof(UnitOfTime.Microsecond) => startOfPeriod.AddTicks(10), // Add 10 ticks to move to the start of the next microsecond
+            nameof(UnitOfTime.Microsecond) => startOfPeriod.AddTicks((long)_ticksPerMicrosecond), // Add 10 ticks to move to the start of the next microsecond
             nameof(UnitOfTime.Millisecond) => startOfPeriod.AddMilliseconds(1),
             nameof(UnitOfTime.Second) => startOfPeriod.AddSeconds(1),
             nameof(UnitOfTime.Minute) => startOfPeriod.AddMinutes(1),
@@ -204,11 +208,74 @@ public static class DateTimeExtension
             nameof(UnitOfTime.Quarter) => startOfPeriod.AddMonths(3), // Quarters consist of 3 months
             nameof(UnitOfTime.Year) => startOfPeriod.AddYears(1),
             nameof(UnitOfTime.Decade) => startOfPeriod.AddYears(10),
-            _ => throw new ArgumentOutOfRangeException(nameof(precision), $"Unsupported UnitOfTime: {precision.Name}")
+            _ => throw new ArgumentOutOfRangeException(nameof(unitOfTime), $"Unsupported UnitOfTime: {unitOfTime.Name}")
         };
 
         // Subtract one tick to get the last moment of the current period
         return startOfPeriod.AddTicks(-1);
+    }
+
+    /// <summary>
+    /// Adds a specified amount of time to the given <see cref="System.DateTime"/> object based on the provided <see cref="UnitOfTime"/>.
+    /// </summary>
+    /// <param name="dateTime">The original <see cref="System.DateTime"/> object to which time will be added.</param>
+    /// <param name="value">The amount of time to add. Can be a fractional value for finer granularity.</param>
+    /// <param name="unitOfTime">The unit of time to add, specified as a <see cref="UnitOfTime"/>.</param>
+    /// <returns>A new <see cref="System.DateTime"/> object that is the result of adding the specified amount of time to the original date and time.</returns>
+    [Pure]
+    public static System.DateTime Add(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
+    {
+        switch (unitOfTime.Name)
+        {
+            case nameof(UnitOfTime.Tick):
+                return dateTime.AddTicks((long)value);
+            case nameof(UnitOfTime.Nanosecond):
+                double totalTicksForNanoseconds = value / _ticksPerNanosecond;
+                var wholeTicksForNanoseconds = (long)totalTicksForNanoseconds;
+                double fractionalTicksForNanoseconds = totalTicksForNanoseconds - wholeTicksForNanoseconds;
+                dateTime = dateTime.AddTicks(wholeTicksForNanoseconds);
+                return dateTime.AddTicks((long)(fractionalTicksForNanoseconds * _ticksPerNanosecond));
+            case nameof(UnitOfTime.Microsecond):
+                double totalTicksForMicroseconds = value * _ticksPerMicrosecond;
+                var wholeTicksForMicroseconds = (long)totalTicksForMicroseconds;
+                double fractionalTicksForMicroseconds = totalTicksForMicroseconds - wholeTicksForMicroseconds;
+                dateTime = dateTime.AddTicks(wholeTicksForMicroseconds);
+                return dateTime.AddTicks((long)(fractionalTicksForMicroseconds * _ticksPerMicrosecond));
+            case nameof(UnitOfTime.Millisecond):
+                return dateTime.AddMilliseconds(value);
+            case nameof(UnitOfTime.Second):
+                return dateTime.AddSeconds(value);
+            case nameof(UnitOfTime.Minute):
+                return dateTime.AddMinutes(value);
+            case nameof(UnitOfTime.Hour):
+                return dateTime.AddHours(value);
+            case nameof(UnitOfTime.Day):
+                return dateTime.AddDays(value);
+            case nameof(UnitOfTime.Week):
+                return dateTime.AddDays(value * 7);
+            case nameof(UnitOfTime.Month):
+                var wholeMonths = (int)value;
+                double fractionalMonths = value - wholeMonths;
+                dateTime = dateTime.AddMonths(wholeMonths);
+                return dateTime.AddDays(fractionalMonths * System.DateTime.DaysInMonth(dateTime.Year, dateTime.Month));
+            case nameof(UnitOfTime.Quarter):
+                return dateTime.AddMonths((int)(value * 3));
+            case nameof(UnitOfTime.Year):
+                var wholeYears = (int)value;
+                double fractionalYears = value - wholeYears;
+                dateTime = dateTime.AddYears(wholeYears);
+                return dateTime.AddDays(fractionalYears * (System.DateTime.IsLeapYear(dateTime.Year) ? 366 : 365));
+            case nameof(UnitOfTime.Decade):
+                return dateTime.AddYears((int)(value * 10));
+            default:
+                throw new ArgumentOutOfRangeException(nameof(unitOfTime), $"Unsupported UnitOfTime: {unitOfTime.Name}");
+        }
+    }
+
+    [Pure]
+    public static System.DateTime Subtract(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
+    {
+        return dateTime.Add(-value, unitOfTime);
     }
 
     /// <inheritdoc cref="Trim(System.DateTime, UnitOfTime, DateTimeKind?)"/>
@@ -255,7 +322,7 @@ public static class DateTimeExtension
     /// <remarks>
     /// This method creates a <see cref="System.DateTimeOffset"/> object from the provided <see cref="System.DateTime"/>.
     /// The <see cref="System.DateTime"/> object is assumed to be in the local time zone if it is unspecified or specified as local.
-    /// If the <see cref="System.DateTime"/> object is specified as UTC, the resulting <see cref="System.DateTimeOffset"/>
+    /// If the <see cref="System.DateTime"/> object is specified as UTC, the resulting <see cref="DateTimeOffset"/>
     /// will have an offset of zero.
     /// </remarks>
     /// <param name="dateTime">The <see cref="System.DateTime"/> object to convert.</param>
@@ -270,7 +337,7 @@ public static class DateTimeExtension
     /// Converts a <see cref="System.DateTime"/> object to the number of seconds that have elapsed since the Unix epoch (1970-01-01T00:00:00Z).
     /// </summary>
     /// <remarks>
-    /// This method first converts the <see cref="System.DateTime"/> object to a <see cref="System.DateTimeOffset"/> to accurately account for time zone differences
+    /// This method first converts the <see cref="System.DateTime"/> object to a <see cref="DateTimeOffset"/> to accurately account for time zone differences
     /// before calculating the Unix time. The input <see cref="System.DateTime"/> should be in UTC to ensure an accurate conversion to Unix time seconds.
     /// </remarks>
     /// <param name="utc">The UTC <see cref="System.DateTime"/> to convert to Unix time seconds.</param>
@@ -411,5 +478,17 @@ public static class DateTimeExtension
             tzHour += 24;
 
         return tzHour;
+    }
+
+    /// <summary>
+    /// Subtracts an amount (delay) of time (endAt), and then adds subtracts another amount (subtraction) of time (startAt).
+    /// </summary>
+    [Pure]
+    public static (System.DateTime startAt, System.DateTime endAt) ToWindow(this System.DateTime dateTime, int delay, int subtraction, UnitOfTime unitOfTime)
+    {
+        System.DateTime endAt = dateTime.Subtract(delay, unitOfTime);
+        System.DateTime startAt = endAt.Subtract(subtraction, unitOfTime);
+
+        return (startAt, endAt);
     }
 }
