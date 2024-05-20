@@ -456,31 +456,6 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Converts a specific hour in UTC to its corresponding hour in a specified time zone.
-    /// </summary>
-    /// <remarks>
-    /// This method calculates the time zone equivalent of a specified UTC hour, accounting for the specified time zone's offset from UTC, including any adjustments for daylight saving time (DST). 
-    /// The conversion ensures that the result is always a positive hour in the 24-hour format. This method is designed to wrap around the clock, so a conversion resulting in negative hours or hours beyond 24 will be adjusted to fit within the 0-24 range.
-    /// Note: It's possible for the method to return 24, which is equivalent to 0 and represents midnight at the start of a new day.
-    /// </remarks>
-    /// <param name="utcNow">The current UTC date and time, used to calculate the correct time zone offset, including consideration for DST.</param>
-    /// <param name="utcHour">The hour in UTC to be converted, specified in the 24-hour format.</param>
-    /// <param name="timeZoneInfo">The time zone to which the UTC hour will be converted.</param>
-    /// <returns>The corresponding hour in the specified time zone, adjusted to a positive number in the 24-hour format. This can include returning 24 to indicate midnight.</returns>
-    [Pure]
-    public static int ToTzHoursFromUtc(this System.DateTime utcNow, int utcHour, System.TimeZoneInfo timeZoneInfo)
-    {
-        int utcHoursOffset = utcNow.ToTzOffsetHours(timeZoneInfo);
-
-        int tzHour = utcHour + utcHoursOffset;
-
-        if (tzHour < 0)
-            tzHour += 24;
-
-        return tzHour;
-    }
-
-    /// <summary>
     /// Subtracts an amount (delay) of time (endAt), and then adds subtracts another amount (subtraction) of time (startAt).
     /// </summary>
     [Pure]
