@@ -2,7 +2,6 @@
 using Soenneker.Enums.UnitOfTime;
 using Soenneker.Tests.Unit;
 using System;
-using Soenneker.Utils.TimeZones;
 using Xunit;
 
 namespace Soenneker.Extensions.DateTime.Tests;

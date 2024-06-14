@@ -1,5 +1,6 @@
 ﻿using Soenneker.Extensions.TimeZoneInfo;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace Soenneker.Extensions.DateTime;
 
@@ -136,5 +137,15 @@ public static class DateTimeExtensionFormat
     {
         var result = dateTime.ToString("yyyy-MM-dd--HH-mm-ss");
         return result;
+    }
+
+    /// <summary>
+    /// Formats the DateTime object to a string in the format "MMM dd, yyyy".
+    /// </summary>
+    /// <param name="dateTime">The DateTime object to format.</param>
+    /// <returns>A string representing the formatted DateTime.</returns>
+    public static string ToDisplayFormat(this System.DateTime dateTime)
+    {
+        return dateTime.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture);
     }
 }
