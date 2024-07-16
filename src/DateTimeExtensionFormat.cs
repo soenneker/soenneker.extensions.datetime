@@ -143,9 +143,33 @@ public static class DateTimeExtensionFormat
     /// Formats the DateTime object to a string in the format "MMM dd, yyyy".
     /// </summary>
     /// <param name="dateTime">The DateTime object to format.</param>
-    /// <returns>A string representing the formatted DateTime.</returns>
-    public static string ToDisplayFormat(this System.DateTime dateTime)
+    /// <returns>A string representing the formatted DateTime in the "MMM dd, yyyy" format.</returns>
+    /// <example>
+    /// <code>
+    /// DateTime date = new DateTime(2017, 1, 5);
+    /// string formattedDate = date.ToDisplayFormat();
+    /// // formattedDate will be "Jan 05, 2017"
+    /// </code>
+    /// </example>
+    public static string ToShortMonthDayYearString(this System.DateTime dateTime)
     {
         return dateTime.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Formats the DateTime object to a string in the format "MMMM d, yyyy".
+    /// </summary>
+    /// <param name="dateTime">The DateTime object to format.</param>
+    /// <returns>A string representing the formatted DateTime in the "MMMM d, yyyy" format.</returns>
+    /// <example>
+    /// <code>
+    /// DateTime date = new DateTime(2017, 1, 5);
+    /// string formattedDate = date.ToLongMonthDayYearString();
+    /// // formattedDate will be "January 5, 2017"
+    /// </code>
+    /// </example>
+    public static string ToLongMonthDayYearString(this System.DateTime dateTime)
+    {
+        return dateTime.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture);
     }
 }
