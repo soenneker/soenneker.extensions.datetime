@@ -1,6 +1,7 @@
 ﻿using Soenneker.Extensions.TimeZoneInfo;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Soenneker.Extensions.DateTime;
 
@@ -8,10 +9,10 @@ public static class DateTimeExtensionFormat
 {
     /// <summary><code>hh tt {timezone}</code></summary>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToHourFormat(this System.DateTime dateTime, System.TimeZoneInfo timeZoneInfo)
     {
-        var result = dateTime.ToString($"hh tt {timeZoneInfo.ToSimpleAbbreviation()}");
-        return result;
+        return dateTime.ToString($"hh tt {timeZoneInfo.ToSimpleAbbreviation()}");
     }
 
     /// <summary>
@@ -19,10 +20,10 @@ public static class DateTimeExtensionFormat
     /// </summary>
     /// <code>"yyyy-MM-ddTHH:mm:ss.fffffff"</code>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToPreciseFormat(this System.DateTime dateTime)
     {
-        var result = dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffffff");
-        return result;
+        return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffffff");
     }
 
     /// <summary>
@@ -31,6 +32,7 @@ public static class DateTimeExtensionFormat
     /// <param name="utc">Needs to be in UTC already.</param>
     /// <code>"yyyy-MM-ddTHH:mm:ss.fffffffZ"</code>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToPreciseUtcFormat(this System.DateTime utc)
     {
         return utc.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ");
@@ -42,6 +44,7 @@ public static class DateTimeExtensionFormat
     /// <param name="utc">Needs to be UTC</param>
     /// <code>"yyyy-MM-ddTHH:mm:ss.fffZ"</code>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToIso8601(this System.DateTime utc)
     {
         return utc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
@@ -49,10 +52,10 @@ public static class DateTimeExtensionFormat
 
     ///<inheritdoc cref="ToIso8601"/>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToWebString(this System.DateTime utc)
     {
-        string result = utc.ToIso8601();
-        return result;
+        return utc.ToIso8601();
     }
 
     /// <summary>
@@ -62,10 +65,10 @@ public static class DateTimeExtensionFormat
     /// <param name="utcTime">Needs to be UTC</param>
     /// <param name="tzInfo"></param>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToTzDateTimeFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
     {
-        string result = utcTime.ToTz(tzInfo).ToDateTimeFormatAsTz(tzInfo);
-        return result;
+        return utcTime.ToTz(tzInfo).ToDateTimeFormatAsTz(tzInfo);
     }
 
     /// <summary>
@@ -75,10 +78,10 @@ public static class DateTimeExtensionFormat
     /// <param name="utcTime">Needs to be UTC</param>
     /// <param name="tzInfo"></param>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToTzDateFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
     {
-        var result = utcTime.ToTz(tzInfo).ToString("MM/dd/yyyy");
-        return result;
+        return utcTime.ToTz(tzInfo).ToString("MM/dd/yyyy");
     }
 
     /// <summary>
@@ -88,10 +91,10 @@ public static class DateTimeExtensionFormat
     /// <param name="utcTime">Needs to be UTC</param>
     /// <param name="tzInfo"></param>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToTzDateHourFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
     {
-        var result = utcTime.ToTz(tzInfo).ToString($"MM/dd/yyyy h tt {tzInfo.ToSimpleAbbreviation()}");
-        return result;
+        return utcTime.ToTz(tzInfo).ToString($"MM/dd/yyyy h tt {tzInfo.ToSimpleAbbreviation()}");;
     }
 
     /// <summary>
@@ -99,10 +102,10 @@ public static class DateTimeExtensionFormat
     /// <code>MM/dd/yyyy hh:mm:ss tt ET</code>
     /// </summary>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToDateTimeFormatAsTz(this System.DateTime tzTime, System.TimeZoneInfo tzInfo)
     {
-        var result = tzTime.ToString($"MM/dd/yyyy hh:mm:ss tt {tzInfo.ToSimpleAbbreviation()}");
-        return result;
+        return tzTime.ToString($"MM/dd/yyyy hh:mm:ss tt {tzInfo.ToSimpleAbbreviation()}");
     }
 
     /// <summary>
@@ -111,10 +114,10 @@ public static class DateTimeExtensionFormat
     /// </summary>
     /// <param name="utc">Needs to be UTC</param>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToUtcDateTimeFormat(this System.DateTime utc)
     {
-        var result = utc.ToString("MM/dd/yyyy hh:mm:ss tt UTC");
-        return result;
+        return utc.ToString("MM/dd/yyyy hh:mm:ss tt UTC");
     }
 
     /// <summary>
@@ -122,10 +125,10 @@ public static class DateTimeExtensionFormat
     /// <code>yyyy-MM-dd--HH-mm-ss</code>
     /// </summary>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToTzFileName(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
     {
-        string result = utcTime.ToTz(tzInfo).ToFileName();
-        return result;
+        return utcTime.ToTz(tzInfo).ToFileName();
     }
 
     /// <summary>
@@ -133,10 +136,10 @@ public static class DateTimeExtensionFormat
     /// <code>yyyy-MM-dd--HH-mm-ss</code>
     /// </summary>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToFileName(this System.DateTime dateTime)
     {
-        var result = dateTime.ToString("yyyy-MM-dd--HH-mm-ss");
-        return result;
+        return dateTime.ToString("yyyy-MM-dd--HH-mm-ss");
     }
 
     /// <summary>
@@ -151,6 +154,8 @@ public static class DateTimeExtensionFormat
     /// // formattedDate will be "Jan 05, 2017"
     /// </code>
     /// </example>
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToShortMonthDayYearString(this System.DateTime dateTime)
     {
         return dateTime.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture);
@@ -168,6 +173,8 @@ public static class DateTimeExtensionFormat
     /// // formattedDate will be "January 5, 2017"
     /// </code>
     /// </example>
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToLongMonthDayYearString(this System.DateTime dateTime)
     {
         return dateTime.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture);

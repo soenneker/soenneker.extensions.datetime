@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 using Soenneker.Enums.UnitOfTime;
 
 namespace Soenneker.Extensions.DateTime;
@@ -273,6 +274,7 @@ public static class DateTimeExtension
     }
 
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static System.DateTime Subtract(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
     {
         return dateTime.Add(-value, unitOfTime);
@@ -328,6 +330,7 @@ public static class DateTimeExtension
     /// <param name="dateTime">The <see cref="System.DateTime"/> object to convert.</param>
     /// <returns>A <see cref="System.DateTimeOffset"/> object that represents the same point in time as the <paramref name="dateTime"/> parameter.</returns>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static DateTimeOffset ToDateTimeOffset(this System.DateTime dateTime)
     {
         return new DateTimeOffset(dateTime);
@@ -345,8 +348,7 @@ public static class DateTimeExtension
     [Pure]
     public static long ToUnixTimeSeconds(this System.DateTime utc)
     {
-        long result = utc.ToDateTimeOffset().ToUnixTimeSeconds();
-        return result;
+        return utc.ToDateTimeOffset().ToUnixTimeSeconds();
     }
 
     /// <summary>
@@ -371,8 +373,7 @@ public static class DateTimeExtension
     [Pure]
     public static bool IsBetween(this System.DateTime dateTime, System.DateTime startAt, System.DateTime endAt)
     {
-        bool result = dateTime >= startAt && dateTime <= endAt;
-        return result;
+        return dateTime >= startAt && dateTime <= endAt;
     }
 
     /// <summary>
@@ -412,8 +413,7 @@ public static class DateTimeExtension
     [Pure]
     public static int ToTzOffsetHours(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
     {
-        int result = utcNow.ToTzOffset(timeZoneInfo).Hours;
-        return result;
+        return utcNow.ToTzOffset(timeZoneInfo).Hours;
     }
 
     /// <summary>
@@ -431,8 +431,7 @@ public static class DateTimeExtension
     [Pure]
     public static TimeSpan ToTzOffset(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
     {
-        TimeSpan result = timeZoneInfo.GetUtcOffset(utcNow.ToTz(timeZoneInfo));
-        return result;
+        return timeZoneInfo.GetUtcOffset(utcNow.ToTz(timeZoneInfo));
     }
 
     /// <summary>
