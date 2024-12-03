@@ -274,7 +274,6 @@ public static class DateTimeExtension
     }
 
     [Pure]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static System.DateTime Subtract(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
     {
         return dateTime.Add(-value, unitOfTime);
@@ -330,7 +329,6 @@ public static class DateTimeExtension
     /// <param name="dateTime">The <see cref="System.DateTime"/> object to convert.</param>
     /// <returns>A <see cref="System.DateTimeOffset"/> object that represents the same point in time as the <paramref name="dateTime"/> parameter.</returns>
     [Pure]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static DateTimeOffset ToDateTimeOffset(this System.DateTime dateTime)
     {
         return new DateTimeOffset(dateTime);
