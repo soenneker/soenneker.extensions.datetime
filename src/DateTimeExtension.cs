@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
 using Soenneker.Enums.UnitOfTime;
 
 namespace Soenneker.Extensions.DateTime;
