@@ -24,6 +24,13 @@ public static class DateTimeExtensionFormat
         return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffffff");
     }
 
+    /// <summary>"MM-dd-yyyy"</summary>
+    [Pure]
+    public static string ToMonthFirstDateFormat(this System.DateTime dateTime)
+    {
+        return dateTime.ToString("MM-dd-yyyy");
+    }
+
     /// <summary>
     /// Not typically for UI display, for admin/debug purposes. Appends Zulu ("Z") to string. Does not do any conversion.
     /// </summary>
@@ -86,7 +93,8 @@ public static class DateTimeExtensionFormat
     [Pure]
     public static string ToTzDateHourFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
     {
-        return utcTime.ToTz(tzInfo).ToString($"MM/dd/yyyy h tt {tzInfo.ToSimpleAbbreviation()}");;
+        return utcTime.ToTz(tzInfo).ToString($"MM/dd/yyyy h tt {tzInfo.ToSimpleAbbreviation()}");
+        ;
     }
 
     /// <summary>
