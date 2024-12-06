@@ -43,6 +43,6 @@
 
     <ItemGroup>
       <PackageReference Include="Soenneker.Enums.UnitOfTime" Version="3.0.234" />
-      <PackageReference Include="Soenneker.Extensions.TimeZoneInfo" Version="3.0.314" />
+      <PackageReference Include="Soenneker.Extensions.TimeZoneInfo" Version="3.0.316" />
     </ItemGroup>
 </Project>
