@@ -30,9 +30,7 @@ public static class DateTimeExtension
     {
         System.DateTime converted = System.TimeZoneInfo.ConvertTimeFromUtc(utcTime, tzInfo);
 
-        System.DateTime result = converted.ToUtcKind();
-
-        return result;
+        return converted.ToUtcKind();
     }
 
     /// <summary>
@@ -59,9 +57,7 @@ public static class DateTimeExtension
     {
         tzTime = tzTime.ToUnspecifiedKind();
 
-        System.DateTime result = System.TimeZoneInfo.ConvertTimeToUtc(tzTime, tzInfo);
-
-        return result;
+        return System.TimeZoneInfo.ConvertTimeToUtc(tzTime, tzInfo);
     }
 
     /// <summary>
@@ -447,8 +443,7 @@ public static class DateTimeExtension
     public static int ToUtcHoursFromTz(this System.DateTime utcNow, int tzHour, System.TimeZoneInfo timeZoneInfo)
     {
         int utcHoursOffset = utcNow.ToTzOffsetHours(timeZoneInfo);
-        int utcHour = (tzHour - utcHoursOffset) % 24;
-        return utcHour;
+        return (tzHour - utcHoursOffset) % 24;
     }
 
     /// <summary>
