@@ -457,4 +457,15 @@ public static class DateTimeExtension
 
         return (startAt, endAt);
     }
+
+    /// <summary>
+    /// Converts a <see cref="System.DateTime"/> to a <see cref="DateOnly"/> by stripping the time component.
+    /// </summary>
+    /// <param name="dateTime">The <see cref="System.DateTime"/> to convert.</param>
+    /// <returns>A <see cref="DateOnly"/> representing the date portion of the input.</returns>
+    [Pure]
+    public static DateOnly ToDateOnly(this System.DateTime dateTime)
+    {
+        return DateOnly.FromDateTime(dateTime);
+    }
 }
