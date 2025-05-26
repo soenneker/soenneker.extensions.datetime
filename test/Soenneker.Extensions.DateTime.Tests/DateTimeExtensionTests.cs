@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Soenneker.Enums.UnitOfTime;
 using Soenneker.Tests.Unit;
 using System;
