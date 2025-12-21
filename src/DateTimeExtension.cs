@@ -1,6 +1,7 @@
+using Soenneker.Enums.UnitOfTime;
 using System;
 using System.Diagnostics.Contracts;
-using Soenneker.Enums.UnitOfTime;
+using System.Runtime.CompilerServices;
 
 namespace Soenneker.Extensions.DateTime;
 
@@ -74,20 +75,20 @@ public static class DateTimeExtension
         utcNow ??= System.DateTime.UtcNow;
         TimeSpan timeSpan = (utcNow - fromDateTime).Value;
 
-        return unitOfTime.Name switch
+        return unitOfTime.Value switch
         {
-            nameof(UnitOfTime.Tick) => timeSpan.Ticks,
-            nameof(UnitOfTime.Nanosecond) => timeSpan.Ticks * _ticksPerNanosecond,
-            nameof(UnitOfTime.Microsecond) => timeSpan.Ticks / _ticksPerMicrosecond,
-            nameof(UnitOfTime.Millisecond) => timeSpan.TotalMilliseconds,
-            nameof(UnitOfTime.Second) => timeSpan.TotalSeconds,
-            nameof(UnitOfTime.Minute) => timeSpan.TotalMinutes,
-            nameof(UnitOfTime.Hour) => timeSpan.TotalHours,
-            nameof(UnitOfTime.Day) => timeSpan.TotalDays,
-            nameof(UnitOfTime.Week) => timeSpan.TotalHours / 7D,
-            nameof(UnitOfTime.Month) => timeSpan.TotalDays / 30.44,
-            nameof(UnitOfTime.Quarter) => timeSpan.TotalDays / (365.25 / 4D),
-            nameof(UnitOfTime.Year) => timeSpan.TotalDays / 365.25,
+            UnitOfTime.TickValue => timeSpan.Ticks,
+            UnitOfTime.NanosecondValue => timeSpan.Ticks * _ticksPerNanosecond,
+            UnitOfTime.MicrosecondValue => timeSpan.Ticks / _ticksPerMicrosecond,
+            UnitOfTime.MillisecondValue => timeSpan.TotalMilliseconds,
+            UnitOfTime.SecondValue => timeSpan.TotalSeconds,
+            UnitOfTime.MinuteValue => timeSpan.TotalMinutes,
+            UnitOfTime.HourValue => timeSpan.TotalHours,
+            UnitOfTime.DayValue => timeSpan.TotalDays,
+            UnitOfTime.WeekValue => timeSpan.TotalDays / 7D,
+            UnitOfTime.MonthValue => timeSpan.TotalDays / 30.44,
+            UnitOfTime.QuarterValue => timeSpan.TotalDays / (365.25 / 4D),
+            UnitOfTime.YearValue => timeSpan.TotalDays / 365.25,
             _ => throw new NotSupportedException("UnitOfTime is not supported for this method")
         };
     }
@@ -112,33 +113,36 @@ public static class DateTimeExtension
 
         dateTimeKind ??= dateTime.Kind;
 
-        switch (unitOfTime.Name)
+        switch (unitOfTime.Value)
         {
-            case nameof(UnitOfTime.Microsecond):
-                {
-                    long truncatedTicks = dateTime.Ticks - dateTime.Ticks % (long)_ticksPerMicrosecond;
-                    trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
-                    break;
-                }
-            case nameof(UnitOfTime.Millisecond):
-                {
-                    long truncatedTicks = dateTime.Ticks - dateTime.Ticks % 10000;
-                    trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
-                    break;
-                }
-            case nameof(UnitOfTime.Second):
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, 0, dateTimeKind.Value);
+            case UnitOfTime.MicrosecondValue:
+            {
+                long ticks = dateTime.Ticks;
+                long truncatedTicks = ticks - ticks % (long)_ticksPerMicrosecond;
+                trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
                 break;
-            case nameof(UnitOfTime.Minute):
+            }
+            case UnitOfTime.MillisecondValue:
+            {
+                long ticks = dateTime.Ticks;
+                long truncatedTicks = ticks - ticks % 10000;
+                trimmed = new System.DateTime(truncatedTicks, dateTime.Kind);
+                break;
+            }
+            case UnitOfTime.SecondValue:
+                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, 0,
+                    dateTimeKind.Value);
+                break;
+            case UnitOfTime.MinuteValue:
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, 0, dateTimeKind.Value);
                 break;
-            case nameof(UnitOfTime.Hour):
+            case UnitOfTime.HourValue:
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, 0, dateTimeKind.Value);
                 break;
-            case nameof(UnitOfTime.Day):
+            case UnitOfTime.DayValue:
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
-            case nameof(UnitOfTime.Week): // Considering Monday is the first day - ISO 8601
+            case UnitOfTime.WeekValue: // Considering Monday is the first day - ISO 8601
             {
                 int daysToSubtract = (int)dateTime.DayOfWeek - (int)DayOfWeek.Monday;
                 if (daysToSubtract < 0)
@@ -149,19 +153,19 @@ public static class DateTimeExtension
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value).AddDays(-daysToSubtract);
                 break;
             }
-            case nameof(UnitOfTime.Month):
+            case UnitOfTime.MonthValue:
                 trimmed = new System.DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
-            case nameof(UnitOfTime.Quarter):
+            case UnitOfTime.QuarterValue:
                 // Determine the start month of the quarter
                 int quarterNumber = (dateTime.Month - 1) / 3;
                 int startMonthOfQuarter = quarterNumber * 3 + 1;
                 trimmed = new System.DateTime(dateTime.Year, startMonthOfQuarter, 1, 0, 0, 0, 0, dateTime.Kind);
                 break;
-            case nameof(UnitOfTime.Year):
+            case UnitOfTime.YearValue:
                 trimmed = new System.DateTime(dateTime.Year, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
-            case nameof(UnitOfTime.Decade):
+            case UnitOfTime.DecadeValue:
                 // Calculate the start year of the decade
                 int startYearOfDecade = dateTime.Year - dateTime.Year % 10;
                 trimmed = new System.DateTime(startYearOfDecade, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
@@ -191,19 +195,19 @@ public static class DateTimeExtension
     {
         System.DateTime startOfPeriod = dateTime.Trim(unitOfTime, dateTimeKind);
 
-        startOfPeriod = unitOfTime.Name switch
+        startOfPeriod = unitOfTime.Value switch
         {
-            nameof(UnitOfTime.Microsecond) => startOfPeriod.AddTicks((long)_ticksPerMicrosecond), // Add 10 ticks to move to the start of the next microsecond
-            nameof(UnitOfTime.Millisecond) => startOfPeriod.AddMilliseconds(1),
-            nameof(UnitOfTime.Second) => startOfPeriod.AddSeconds(1),
-            nameof(UnitOfTime.Minute) => startOfPeriod.AddMinutes(1),
-            nameof(UnitOfTime.Hour) => startOfPeriod.AddHours(1),
-            nameof(UnitOfTime.Day) => startOfPeriod.AddDays(1),
-            nameof(UnitOfTime.Week) => startOfPeriod.AddDays(7),
-            nameof(UnitOfTime.Month) => startOfPeriod.AddMonths(1),
-            nameof(UnitOfTime.Quarter) => startOfPeriod.AddMonths(3), // Quarters consist of 3 months
-            nameof(UnitOfTime.Year) => startOfPeriod.AddYears(1),
-            nameof(UnitOfTime.Decade) => startOfPeriod.AddYears(10),
+            UnitOfTime.MicrosecondValue => startOfPeriod.AddTicks((long)_ticksPerMicrosecond), // Add 10 ticks to move to the start of the next microsecond
+            UnitOfTime.MillisecondValue => startOfPeriod.AddMilliseconds(1),
+            UnitOfTime.SecondValue => startOfPeriod.AddSeconds(1),
+            UnitOfTime.MinuteValue => startOfPeriod.AddMinutes(1),
+            UnitOfTime.HourValue => startOfPeriod.AddHours(1),
+            UnitOfTime.DayValue => startOfPeriod.AddDays(1),
+            UnitOfTime.WeekValue => startOfPeriod.AddDays(7),
+            UnitOfTime.MonthValue => startOfPeriod.AddMonths(1),
+            UnitOfTime.QuarterValue => startOfPeriod.AddMonths(3), // Quarters consist of 3 months
+            UnitOfTime.YearValue => startOfPeriod.AddYears(1),
+            UnitOfTime.DecadeValue => startOfPeriod.AddYears(10),
             _ => throw new ArgumentOutOfRangeException(nameof(unitOfTime), $"Unsupported UnitOfTime: {unitOfTime.Name}")
         };
 
@@ -221,47 +225,47 @@ public static class DateTimeExtension
     [Pure]
     public static System.DateTime Add(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
     {
-        switch (unitOfTime.Name)
+        switch (unitOfTime.Value)
         {
-            case nameof(UnitOfTime.Tick):
+            case UnitOfTime.TickValue:
                 return dateTime.AddTicks((long)value);
-            case nameof(UnitOfTime.Nanosecond):
+            case UnitOfTime.NanosecondValue:
                 double totalTicksForNanoseconds = value / _ticksPerNanosecond;
                 var wholeTicksForNanoseconds = (long)totalTicksForNanoseconds;
                 double fractionalTicksForNanoseconds = totalTicksForNanoseconds - wholeTicksForNanoseconds;
                 dateTime = dateTime.AddTicks(wholeTicksForNanoseconds);
                 return dateTime.AddTicks((long)(fractionalTicksForNanoseconds * _ticksPerNanosecond));
-            case nameof(UnitOfTime.Microsecond):
+            case UnitOfTime.MicrosecondValue:
                 double totalTicksForMicroseconds = value * _ticksPerMicrosecond;
                 var wholeTicksForMicroseconds = (long)totalTicksForMicroseconds;
                 double fractionalTicksForMicroseconds = totalTicksForMicroseconds - wholeTicksForMicroseconds;
                 dateTime = dateTime.AddTicks(wholeTicksForMicroseconds);
                 return dateTime.AddTicks((long)(fractionalTicksForMicroseconds * _ticksPerMicrosecond));
-            case nameof(UnitOfTime.Millisecond):
+            case UnitOfTime.MillisecondValue:
                 return dateTime.AddMilliseconds(value);
-            case nameof(UnitOfTime.Second):
+            case UnitOfTime.SecondValue:
                 return dateTime.AddSeconds(value);
-            case nameof(UnitOfTime.Minute):
+            case UnitOfTime.MinuteValue:
                 return dateTime.AddMinutes(value);
-            case nameof(UnitOfTime.Hour):
+            case UnitOfTime.HourValue:
                 return dateTime.AddHours(value);
-            case nameof(UnitOfTime.Day):
+            case UnitOfTime.DayValue:
                 return dateTime.AddDays(value);
-            case nameof(UnitOfTime.Week):
+            case UnitOfTime.WeekValue:
                 return dateTime.AddDays(value * 7);
-            case nameof(UnitOfTime.Month):
+            case UnitOfTime.MonthValue:
                 var wholeMonths = (int)value;
                 double fractionalMonths = value - wholeMonths;
                 dateTime = dateTime.AddMonths(wholeMonths);
                 return dateTime.AddDays(fractionalMonths * System.DateTime.DaysInMonth(dateTime.Year, dateTime.Month));
-            case nameof(UnitOfTime.Quarter):
+            case UnitOfTime.QuarterValue:
                 return dateTime.AddMonths((int)(value * 3));
-            case nameof(UnitOfTime.Year):
+            case UnitOfTime.YearValue:
                 var wholeYears = (int)value;
                 double fractionalYears = value - wholeYears;
                 dateTime = dateTime.AddYears(wholeYears);
                 return dateTime.AddDays(fractionalYears * (System.DateTime.IsLeapYear(dateTime.Year) ? 366 : 365));
-            case nameof(UnitOfTime.Decade):
+            case UnitOfTime.DecadeValue:
                 return dateTime.AddYears((int)(value * 10));
             default:
                 throw new ArgumentOutOfRangeException(nameof(unitOfTime), $"Unsupported UnitOfTime: {unitOfTime.Name}");
@@ -292,6 +296,7 @@ public static class DateTimeExtension
     /// Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method
     /// </summary>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static System.DateTime ToUtcKind(this System.DateTime dateTime)
     {
         if (dateTime.Kind == DateTimeKind.Utc)
@@ -341,7 +346,8 @@ public static class DateTimeExtension
     [Pure]
     public static long ToUnixTimeSeconds(this System.DateTime utc)
     {
-        return utc.ToDateTimeOffset().ToUnixTimeSeconds();
+        return utc.ToDateTimeOffset()
+                  .ToUnixTimeSeconds();
     }
 
     /// <summary>
@@ -386,11 +392,8 @@ public static class DateTimeExtension
     /// </example>
     /// </remarks>
     [Pure]
-    public static int ToDateAsInteger(this System.DateTime dateTime)
-    {
-        var str = dateTime.ToString("yyyyMMdd");
-        return int.Parse(str);
-    }
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public static int ToDateAsInteger(this System.DateTime dateTime) => dateTime.Year * 10000 + dateTime.Month * 100 + dateTime.Day;
 
     /// <summary>
     /// Calculates the whole hour part of the time zone offset for a given UTC date and time and a specified time zone.
@@ -406,7 +409,8 @@ public static class DateTimeExtension
     [Pure]
     public static int ToTzOffsetHours(this System.DateTime utcNow, System.TimeZoneInfo timeZoneInfo)
     {
-        return utcNow.ToTzOffset(timeZoneInfo).Hours;
+        return utcNow.ToTzOffset(timeZoneInfo)
+                     .Hours;
     }
 
     /// <summary>
@@ -443,8 +447,15 @@ public static class DateTimeExtension
     public static int ToUtcHoursFromTz(this System.DateTime utcNow, int tzHour, System.TimeZoneInfo timeZoneInfo)
     {
         int utcHoursOffset = utcNow.ToTzOffsetHours(timeZoneInfo);
-        return (tzHour - utcHoursOffset) % 24;
+
+        int v = tzHour - utcHoursOffset;
+        v %= 24;
+
+        if (v < 0)
+            v += 24;
+        return v;
     }
+
 
     /// <summary>
     /// Subtracts an amount (delay) of time (endAt), and then adds subtracts another amount (subtraction) of time (startAt).
