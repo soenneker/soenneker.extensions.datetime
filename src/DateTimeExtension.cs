@@ -10,7 +10,7 @@ namespace Soenneker.Extensions.DateTime;
 /// </summary>
 public static class DateTimeExtension
 {
-    private const double _ticksPerNanosecond = 100.0;
+    private const double _nanosecondsPerTick = 100.0;
     private const double _ticksPerMicrosecond = 10.0;
 
     /// <summary>
@@ -78,7 +78,7 @@ public static class DateTimeExtension
         return unitOfTime.Value switch
         {
             UnitOfTime.TickValue => timeSpan.Ticks,
-            UnitOfTime.NanosecondValue => timeSpan.Ticks * _ticksPerNanosecond,
+            UnitOfTime.NanosecondValue => timeSpan.Ticks * _nanosecondsPerTick,
             UnitOfTime.MicrosecondValue => timeSpan.Ticks / _ticksPerMicrosecond,
             UnitOfTime.MillisecondValue => timeSpan.TotalMilliseconds,
             UnitOfTime.SecondValue => timeSpan.TotalSeconds,
@@ -86,11 +86,116 @@ public static class DateTimeExtension
             UnitOfTime.HourValue => timeSpan.TotalHours,
             UnitOfTime.DayValue => timeSpan.TotalDays,
             UnitOfTime.WeekValue => timeSpan.TotalDays / 7D,
-            UnitOfTime.MonthValue => timeSpan.TotalDays / 30.44,
-            UnitOfTime.QuarterValue => timeSpan.TotalDays / (365.25 / 4D),
-            UnitOfTime.YearValue => timeSpan.TotalDays / 365.25,
+
+            // calendar-exact (whole + fractional based on actual next interval length)
+            UnitOfTime.MonthValue => MonthsBetween(fromDateTime, utcNow.Value),
+            UnitOfTime.QuarterValue => QuartersBetween(fromDateTime, utcNow.Value),
+            UnitOfTime.YearValue => YearsBetween(fromDateTime, utcNow.Value),
+
             _ => throw new NotSupportedException("UnitOfTime is not supported for this method")
         };
+    }
+
+    [Pure]
+    public static double QuartersBetween(System.DateTime from, System.DateTime to)
+    {
+        if (to < from)
+            (from, to) = (to, from);
+
+        int whole = WholeQuartersBetween(from, to);
+        System.DateTime start = from.AddMonths(whole * 3);
+        System.DateTime end = start.AddMonths(3);
+
+        if (start == to)
+            return whole;
+
+        // fraction of the next quarter interval
+        double frac = (to - start).Ticks / (double)(end - start).Ticks;
+        return whole + frac;
+    }
+
+    [Pure]
+    public static double YearsBetween(System.DateTime from, System.DateTime to)
+    {
+        if (to < from)
+            (from, to) = (to, from);
+
+        int whole = WholeYearsBetween(from, to);
+        System.DateTime start = from.AddYears(whole);
+        System.DateTime end = start.AddYears(1);
+
+        if (start == to)
+            return whole;
+
+        // fraction of the next year interval
+        double frac = (to - start).Ticks / (double)(end - start).Ticks;
+        return whole + frac;
+    }
+
+    [Pure]
+    public static double MonthsBetween(System.DateTime from, System.DateTime to)
+    {
+        if (to < from)
+            (from, to) = (to, from);
+
+        int whole = WholeMonthsBetween(from, to);
+        System.DateTime start = from.AddMonths(whole);
+        System.DateTime end = start.AddMonths(1);
+
+        if (start == to)
+            return whole;
+
+        // fraction of the next month interval
+        double frac = (to - start).Ticks / (double)(end - start).Ticks;
+        return whole + frac;
+    }
+
+    [Pure]
+    public static int WholeMonthsBetween(System.DateTime from, System.DateTime to)
+    {
+        if (to < from)
+            (from, to) = (to, from);
+
+        int months = (to.Year - from.Year) * 12 + (to.Month - from.Month);
+
+        // If "to" hasn't reached the day/time of "from" within that month, back up 1
+        System.DateTime candidate = from.AddMonths(months);
+
+        if (candidate > to)
+            months--;
+
+        return months;
+    }
+
+    [Pure]
+    public static int WholeYearsBetween(System.DateTime from, System.DateTime to)
+    {
+        if (to < from)
+            (from, to) = (to, from);
+
+        int years = to.Year - from.Year;
+        System.DateTime candidate = from.AddYears(years);
+        if (candidate > to)
+            years--;
+
+        return years;
+    }
+
+    [Pure]
+    public static int WholeQuartersBetween(System.DateTime from, System.DateTime to)
+    {
+        if (to < from)
+            (from, to) = (to, from);
+
+        int fromQ = (from.Month - 1) / 3;
+        int toQ = (to.Month - 1) / 3;
+
+        int quarters = (to.Year - from.Year) * 4 + (toQ - fromQ);
+        System.DateTime candidate = from.AddMonths(quarters * 3);
+        if (candidate > to)
+            quarters--;
+
+        return quarters;
     }
 
     /// <summary>
@@ -230,11 +335,11 @@ public static class DateTimeExtension
             case UnitOfTime.TickValue:
                 return dateTime.AddTicks((long)value);
             case UnitOfTime.NanosecondValue:
-                double totalTicksForNanoseconds = value / _ticksPerNanosecond;
+                double totalTicksForNanoseconds = value / _nanosecondsPerTick;
                 var wholeTicksForNanoseconds = (long)totalTicksForNanoseconds;
                 double fractionalTicksForNanoseconds = totalTicksForNanoseconds - wholeTicksForNanoseconds;
                 dateTime = dateTime.AddTicks(wholeTicksForNanoseconds);
-                return dateTime.AddTicks((long)(fractionalTicksForNanoseconds * _ticksPerNanosecond));
+                return dateTime.AddTicks((long)(fractionalTicksForNanoseconds * _nanosecondsPerTick));
             case UnitOfTime.MicrosecondValue:
                 double totalTicksForMicroseconds = value * _ticksPerMicrosecond;
                 var wholeTicksForMicroseconds = (long)totalTicksForMicroseconds;
