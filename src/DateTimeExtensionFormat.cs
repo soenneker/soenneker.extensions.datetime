@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using Soenneker.Extensions.TimeZoneInfos;
 
@@ -8,7 +9,7 @@ public static class DateTimeExtensionFormat
 {
     /// <summary><code>hh tt {timezone}</code></summary>
     [Pure]
-    public static string ToHourFormat(this System.DateTime dateTime, System.TimeZoneInfo timeZoneInfo)
+    public static string ToHourFormat(this System.DateTime dateTime, TimeZoneInfo timeZoneInfo)
     {
         return dateTime.ToString($"hh tt {timeZoneInfo.ToSimpleAbbreviation()}");
     }
@@ -66,7 +67,7 @@ public static class DateTimeExtensionFormat
     /// <param name="utcTime">Needs to be UTC</param>
     /// <param name="tzInfo"></param>
     [Pure]
-    public static string ToTzDateTimeFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
+    public static string ToTzDateTimeFormat(this System.DateTime utcTime, TimeZoneInfo tzInfo)
     {
         return utcTime.ToTz(tzInfo).ToDateTimeFormatAsTz(tzInfo);
     }
@@ -78,7 +79,7 @@ public static class DateTimeExtensionFormat
     /// <param name="utcTime">Needs to be UTC</param>
     /// <param name="tzInfo"></param>
     [Pure]
-    public static string ToTzDateFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
+    public static string ToTzDateFormat(this System.DateTime utcTime, TimeZoneInfo tzInfo)
     {
         return utcTime.ToTz(tzInfo).ToString("MM/dd/yyyy");
     }
@@ -90,7 +91,7 @@ public static class DateTimeExtensionFormat
     /// <param name="utcTime">Needs to be UTC</param>
     /// <param name="tzInfo"></param>
     [Pure]
-    public static string ToTzDateHourFormat(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
+    public static string ToTzDateHourFormat(this System.DateTime utcTime, TimeZoneInfo tzInfo)
     {
         return utcTime.ToTz(tzInfo).ToString($"MM/dd/yyyy h tt {tzInfo.ToSimpleAbbreviation()}");
         ;
@@ -101,7 +102,7 @@ public static class DateTimeExtensionFormat
     /// <code>MM/dd/yyyy hh:mm:ss tt ET</code>
     /// </summary>
     [Pure]
-    public static string ToDateTimeFormatAsTz(this System.DateTime tzTime, System.TimeZoneInfo tzInfo)
+    public static string ToDateTimeFormatAsTz(this System.DateTime tzTime, TimeZoneInfo tzInfo)
     {
         return tzTime.ToString($"MM/dd/yyyy hh:mm:ss tt {tzInfo.ToSimpleAbbreviation()}");
     }
@@ -122,7 +123,7 @@ public static class DateTimeExtensionFormat
     /// <code>yyyy-MM-dd--HH-mm-ss</code>
     /// </summary>
     [Pure]
-    public static string ToTzFileName(this System.DateTime utcTime, System.TimeZoneInfo tzInfo)
+    public static string ToTzFileName(this System.DateTime utcTime, TimeZoneInfo tzInfo)
     {
         return utcTime.ToTz(tzInfo).ToFileName();
     }
