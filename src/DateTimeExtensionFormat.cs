@@ -1,6 +1,6 @@
-﻿using Soenneker.Extensions.TimeZoneInfo;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.Globalization;
+using Soenneker.Extensions.TimeZoneInfos;
 
 namespace Soenneker.Extensions.DateTime;
 
