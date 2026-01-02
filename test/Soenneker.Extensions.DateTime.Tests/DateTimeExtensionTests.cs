@@ -14,14 +14,14 @@ public class DateTimeExtensionTests : UnitTest
         System.DateTime utcNow = System.DateTime.UtcNow;
 
         System.DateTime result = utcNow.Trim(UnitOfTime.Minute);
-        result.Kind.Should().Be(System.DateTimeKind.Utc);
+        result.Kind.Should().Be(DateTimeKind.Utc);
     }
 
     [Fact]
     public void Should_ConvertToUtc_FromEasternStandardTime()
     {
         // Arrange
-        System.TimeZoneInfo easternZone = System.TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+        TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
         var tzTime = new System.DateTime(2023, 3, 10, 12, 0, 0); // Before DST starts in 2023
         var expectedUtcTime = new System.DateTime(2023, 3, 10, 17, 0, 0, DateTimeKind.Utc); // EST is UTC-5
 
@@ -36,7 +36,7 @@ public class DateTimeExtensionTests : UnitTest
     public void Should_HandleDaylightSavingTime_ForEasternTime()
     {
         // Arrange
-        System.TimeZoneInfo easternZone = System.TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+        TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
         var tzTime = new System.DateTime(2023, 3, 13, 12, 0, 0); // After DST starts in 2023
         var expectedUtcTime = new System.DateTime(2023, 3, 13, 16, 0, 0, DateTimeKind.Utc); // EDT is UTC-4
 
@@ -51,7 +51,7 @@ public class DateTimeExtensionTests : UnitTest
     public void Should_ConvertToUtc_FromArizonaTimeZone()
     {
         // Arizona does not observe DST
-        System.TimeZoneInfo arizonaZone = System.TimeZoneInfo.FindSystemTimeZoneById("US Mountain Standard Time");
+        TimeZoneInfo arizonaZone = TimeZoneInfo.FindSystemTimeZoneById("US Mountain Standard Time");
         var tzTime = new System.DateTime(2023, 3, 10, 12, 0, 0); // Date doesn't matter as much since no DST
         var expectedUtcTime = new System.DateTime(2023, 3, 10, 19, 0, 0, DateTimeKind.Utc); // MST is UTC-7
 
