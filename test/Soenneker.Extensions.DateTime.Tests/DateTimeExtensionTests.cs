@@ -1,14 +1,13 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Soenneker.Enums.UnitOfTime;
 using Soenneker.Tests.Unit;
 using System;
-using Xunit;
 
 namespace Soenneker.Extensions.DateTime.Tests;
 
 public class DateTimeExtensionTests : UnitTest
 {
-    [Fact]
+    [Test]
     public void Trim_should_trim()
     {
         System.DateTime utcNow = System.DateTime.UtcNow;
@@ -17,7 +16,7 @@ public class DateTimeExtensionTests : UnitTest
         result.Kind.Should().Be(DateTimeKind.Utc);
     }
 
-    [Fact]
+    [Test]
     public void Should_ConvertToUtc_FromEasternStandardTime()
     {
         // Arrange
@@ -32,7 +31,7 @@ public class DateTimeExtensionTests : UnitTest
         utcTime.Should().Be(expectedUtcTime);
     }
 
-    [Fact]
+    [Test]
     public void Should_HandleDaylightSavingTime_ForEasternTime()
     {
         // Arrange
@@ -47,7 +46,7 @@ public class DateTimeExtensionTests : UnitTest
         utcTime.Should().Be(expectedUtcTime);
     }
 
-    [Fact]
+    [Test]
     public void Should_ConvertToUtc_FromArizonaTimeZone()
     {
         // Arizona does not observe DST
