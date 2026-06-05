@@ -96,6 +96,12 @@ public static class DateTimeExtension
         };
     }
 
+    /// <summary>
+    /// Executes the quarters between operation.
+    /// </summary>
+    /// <param name="from">The from.</param>
+    /// <param name="to">The to.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static double QuartersBetween(System.DateTime from, System.DateTime to)
     {
@@ -114,6 +120,12 @@ public static class DateTimeExtension
         return whole + frac;
     }
 
+    /// <summary>
+    /// Executes the years between operation.
+    /// </summary>
+    /// <param name="from">The from.</param>
+    /// <param name="to">The to.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static double YearsBetween(System.DateTime from, System.DateTime to)
     {
@@ -132,6 +144,12 @@ public static class DateTimeExtension
         return whole + frac;
     }
 
+    /// <summary>
+    /// Executes the months between operation.
+    /// </summary>
+    /// <param name="from">The from.</param>
+    /// <param name="to">The to.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static double MonthsBetween(System.DateTime from, System.DateTime to)
     {
@@ -150,6 +168,12 @@ public static class DateTimeExtension
         return whole + frac;
     }
 
+    /// <summary>
+    /// Executes the whole months between operation.
+    /// </summary>
+    /// <param name="from">The from.</param>
+    /// <param name="to">The to.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static int WholeMonthsBetween(System.DateTime from, System.DateTime to)
     {
@@ -167,6 +191,12 @@ public static class DateTimeExtension
         return months;
     }
 
+    /// <summary>
+    /// Executes the whole years between operation.
+    /// </summary>
+    /// <param name="from">The from.</param>
+    /// <param name="to">The to.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static int WholeYearsBetween(System.DateTime from, System.DateTime to)
     {
@@ -181,6 +211,12 @@ public static class DateTimeExtension
         return years;
     }
 
+    /// <summary>
+    /// Executes the whole quarters between operation.
+    /// </summary>
+    /// <param name="from">The from.</param>
+    /// <param name="to">The to.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static int WholeQuartersBetween(System.DateTime from, System.DateTime to)
     {
@@ -377,20 +413,39 @@ public static class DateTimeExtension
         }
     }
 
+    /// <summary>
+    /// Executes the subtract operation.
+    /// </summary>
+    /// <param name="dateTime">The date time.</param>
+    /// <param name="value">The value.</param>
+    /// <param name="unitOfTime">The unit of time.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static System.DateTime Subtract(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
     {
         return dateTime.Add(-value, unitOfTime);
     }
 
-    /// <inheritdoc cref="Trim(System.DateTime, UnitOfTime, DateTimeKind?)"/>
+    /// <summary>
+    /// Executes the to start of operation.
+    /// </summary>
+    /// <param name="dateTime">The date time.</param>
+    /// <param name="unitOfTime">The unit of time.</param>
+    /// <param name="dateTimeKind">The date time kind.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static System.DateTime ToStartOf(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
     {
         return Trim(dateTime, unitOfTime, dateTimeKind);
     }
 
-    /// <inheritdoc cref="TrimEnd(System.DateTime, UnitOfTime, DateTimeKind?)"/>
+    /// <summary>
+    /// Executes the to end of operation.
+    /// </summary>
+    /// <param name="dateTime">The date time.</param>
+    /// <param name="unitOfTime">The unit of time.</param>
+    /// <param name="dateTimeKind">The date time kind.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static System.DateTime ToEndOf(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
     {

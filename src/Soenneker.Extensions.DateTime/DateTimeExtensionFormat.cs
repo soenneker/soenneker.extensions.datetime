@@ -5,6 +5,9 @@ using Soenneker.Extensions.TimeZoneInfos;
 
 namespace Soenneker.Extensions.DateTime;
 
+/// <summary>
+/// Represents the date time extension format.
+/// </summary>
 public static class DateTimeExtensionFormat
 {
     /// <summary><code>hh tt {timezone}</code></summary>
@@ -53,7 +56,11 @@ public static class DateTimeExtensionFormat
         return utc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
     }
 
-    ///<inheritdoc cref="ToIso8601"/>
+    /// <summary>
+    /// Executes the to web string operation.
+    /// </summary>
+    /// <param name="utc">The utc.</param>
+    /// <returns>The result of the operation.</returns>
     [Pure]
     public static string ToWebString(this System.DateTime utc)
     {
