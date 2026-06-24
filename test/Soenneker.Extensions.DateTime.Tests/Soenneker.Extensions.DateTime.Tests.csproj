@@ -9,7 +9,7 @@
     <ItemGroup>
         <PackageReference Include="Soenneker.Tests.Unit" Version="4.0.1194" />
         <PackageReference Include="Soenneker.Utils.TimeZones" Version="4.0.762" />
-        <PackageReference Include="TUnit" Version="1.56.25" />
+        <PackageReference Include="TUnit" Version="1.56.35" />
     </ItemGroup>
 
     <ItemGroup>
