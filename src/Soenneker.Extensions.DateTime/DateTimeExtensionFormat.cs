@@ -14,7 +14,8 @@ public static class DateTimeExtensionFormat
     [Pure]
     public static string ToHourFormat(this System.DateTime dateTime, TimeZoneInfo timeZoneInfo)
     {
-        return dateTime.ToString($"hh tt {timeZoneInfo.ToSimpleAbbreviation()}");
+        string abbreviation = timeZoneInfo.ToSimpleAbbreviation();
+        return string.Create(CultureInfo.CurrentCulture, $"{dateTime:hh tt} {abbreviation}");
     }
 
     /// <summary>
@@ -100,8 +101,9 @@ public static class DateTimeExtensionFormat
     [Pure]
     public static string ToTzDateHourFormat(this System.DateTime utcTime, TimeZoneInfo tzInfo)
     {
-        return utcTime.ToTz(tzInfo).ToString($"MM/dd/yyyy h tt {tzInfo.ToSimpleAbbreviation()}");
-        ;
+        System.DateTime converted = utcTime.ToTz(tzInfo);
+        string abbreviation = tzInfo.ToSimpleAbbreviation();
+        return string.Create(CultureInfo.CurrentCulture, $"{converted:MM/dd/yyyy h tt} {abbreviation}");
     }
 
     /// <summary>
@@ -111,7 +113,8 @@ public static class DateTimeExtensionFormat
     [Pure]
     public static string ToDateTimeFormatAsTz(this System.DateTime tzTime, TimeZoneInfo tzInfo)
     {
-        return tzTime.ToString($"MM/dd/yyyy hh:mm:ss tt {tzInfo.ToSimpleAbbreviation()}");
+        string abbreviation = tzInfo.ToSimpleAbbreviation();
+        return string.Create(CultureInfo.CurrentCulture, $"{tzTime:MM/dd/yyyy hh:mm:ss tt} {abbreviation}");
     }
 
     /// <summary>
