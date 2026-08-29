@@ -97,11 +97,11 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the quarters between operation.
+    /// Calculates the absolute number of quarters between two instants, including the fractional part of the final three-month interval.
     /// </summary>
-    /// <param name="from">The from.</param>
-    /// <param name="to">The to.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="from">One endpoint of the interval.</param>
+    /// <param name="to">The other endpoint of the interval.</param>
+    /// <returns>The non-negative quarter count, including a fractional remainder.</returns>
     [Pure]
     public static double QuartersBetween(System.DateTime from, System.DateTime to)
     {
@@ -121,11 +121,11 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the years between operation.
+    /// Calculates the absolute number of years between two instants, including the fractional part of the final calendar year.
     /// </summary>
-    /// <param name="from">The from.</param>
-    /// <param name="to">The to.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="from">One endpoint of the interval.</param>
+    /// <param name="to">The other endpoint of the interval.</param>
+    /// <returns>The non-negative year count, including a fractional remainder.</returns>
     [Pure]
     public static double YearsBetween(System.DateTime from, System.DateTime to)
     {
@@ -145,11 +145,11 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the months between operation.
+    /// Calculates the absolute number of months between two instants, including the fractional part of the final calendar month.
     /// </summary>
-    /// <param name="from">The from.</param>
-    /// <param name="to">The to.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="from">One endpoint of the interval.</param>
+    /// <param name="to">The other endpoint of the interval.</param>
+    /// <returns>The non-negative month count, including a fractional remainder.</returns>
     [Pure]
     public static double MonthsBetween(System.DateTime from, System.DateTime to)
     {
@@ -169,11 +169,11 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the whole months between operation.
+    /// Counts complete calendar-month intervals between two instants, regardless of argument order.
     /// </summary>
-    /// <param name="from">The from.</param>
-    /// <param name="to">The to.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="from">One endpoint of the interval.</param>
+    /// <param name="to">The other endpoint of the interval.</param>
+    /// <returns>The number of complete calendar months.</returns>
     [Pure]
     public static int WholeMonthsBetween(System.DateTime from, System.DateTime to)
     {
@@ -192,11 +192,11 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the whole years between operation.
+    /// Counts complete calendar-year intervals between two instants, regardless of argument order.
     /// </summary>
-    /// <param name="from">The from.</param>
-    /// <param name="to">The to.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="from">One endpoint of the interval.</param>
+    /// <param name="to">The other endpoint of the interval.</param>
+    /// <returns>The number of complete calendar years.</returns>
     [Pure]
     public static int WholeYearsBetween(System.DateTime from, System.DateTime to)
     {
@@ -212,11 +212,11 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the whole quarters between operation.
+    /// Counts complete three-month intervals between two instants, regardless of argument order.
     /// </summary>
-    /// <param name="from">The from.</param>
-    /// <param name="to">The to.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="from">One endpoint of the interval.</param>
+    /// <param name="to">The other endpoint of the interval.</param>
+    /// <returns>The number of complete three-month intervals.</returns>
     [Pure]
     public static int WholeQuartersBetween(System.DateTime from, System.DateTime to)
     {
@@ -414,12 +414,12 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the subtract operation.
+    /// Subtracts a quantity expressed in the requested unit of time from a date and time.
     /// </summary>
-    /// <param name="dateTime">The date time.</param>
-    /// <param name="value">The value.</param>
-    /// <param name="unitOfTime">The unit of time.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="dateTime">The date and time to adjust.</param>
+    /// <param name="value">The quantity to subtract.</param>
+    /// <param name="unitOfTime">The calendar or clock unit that controls the adjustment.</param>
+    /// <returns>A new date and time with the quantity subtracted.</returns>
     [Pure]
     public static System.DateTime Subtract(this System.DateTime dateTime, double value, UnitOfTime unitOfTime)
     {
@@ -427,12 +427,12 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the to start of operation.
+    /// Truncates a date and time to the beginning of the requested unit.
     /// </summary>
-    /// <param name="dateTime">The date time.</param>
-    /// <param name="unitOfTime">The unit of time.</param>
-    /// <param name="dateTimeKind">The date time kind.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="dateTime">The date and time to adjust.</param>
+    /// <param name="unitOfTime">The calendar or clock unit that controls the adjustment.</param>
+    /// <param name="dateTimeKind">The kind to assign to the returned value; null preserves the input kind.</param>
+    /// <returns>The truncated date and time.</returns>
     [Pure]
     public static System.DateTime ToStartOf(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
     {
@@ -440,12 +440,12 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Executes the to end of operation.
+    /// Moves a date and time to the final representable tick of the requested unit.
     /// </summary>
-    /// <param name="dateTime">The date time.</param>
-    /// <param name="unitOfTime">The unit of time.</param>
-    /// <param name="dateTimeKind">The date time kind.</param>
-    /// <returns>The result of the operation.</returns>
+    /// <param name="dateTime">The date and time to adjust.</param>
+    /// <param name="unitOfTime">The calendar or clock unit that controls the adjustment.</param>
+    /// <param name="dateTimeKind">The kind to assign to the returned value; null preserves the input kind.</param>
+    /// <returns>The final tick in the selected unit.</returns>
     [Pure]
     public static System.DateTime ToEndOf(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
     {
@@ -455,6 +455,7 @@ public static class DateTimeExtension
     /// <summary>
     /// Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method
     /// </summary>
+    /// <returns>Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method.</returns>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static System.DateTime ToUtcKind(this System.DateTime dateTime)
@@ -468,6 +469,7 @@ public static class DateTimeExtension
     /// <summary>
     /// Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method
     /// </summary>
+    /// <returns>Essentially wraps <see cref="System.DateTime.SpecifyKind"/> in extension method.</returns>
     [Pure]
     public static System.DateTime ToUnspecifiedKind(this System.DateTime dateTime)
     {
@@ -585,6 +587,7 @@ public static class DateTimeExtension
     /// </remarks>
     /// <param name="utcNow">The UTC date and time to calculate the offset for, or null to use the current UTC time.</param>
     /// <param name="timeZoneInfo">The time zone to calculate the offset for.</param>
+    /// <returns>Determines the time zone offset as a TimeSpan for a given UTC date and time in the specified time zone, considering daylight saving time.</returns>
     [Pure]
     public static TimeSpan ToTzOffset(this System.DateTime utcNow, TimeZoneInfo timeZoneInfo)
     {
@@ -620,6 +623,7 @@ public static class DateTimeExtension
     /// <summary>
     /// Subtracts an amount (delay) of time (endAt), and then adds subtracts another amount (subtraction) of time (startAt).
     /// </summary>
+    /// <returns>Subtracts an amount (delay) of time (endAt), and then adds subtracts another amount (subtraction) of time (startAt).</returns>
     [Pure]
     public static (System.DateTime startAt, System.DateTime endAt) ToWindow(this System.DateTime dateTime, int delay, int subtraction, UnitOfTime unitOfTime)
     {
