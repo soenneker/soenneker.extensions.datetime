@@ -8,6 +8,68 @@ namespace Soenneker.Extensions.DateTime.Tests;
 public class DateTimeExtensionTests : UnitTest
 {
     [Test]
+    public void Add_nanoseconds_truncates_to_datetime_tick_resolution()
+    {
+        var value = new System.DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        System.DateTime result = value.Add(150, UnitOfTime.Nanosecond);
+
+        (result.Ticks - value.Ticks).Should().Be(1);
+    }
+
+    [Test]
+    public void Add_fractional_microseconds_truncates_to_datetime_tick_resolution()
+    {
+        var value = new System.DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        System.DateTime result = value.Add(0.15, UnitOfTime.Microsecond);
+
+        (result.Ticks - value.Ticks).Should().Be(1);
+    }
+
+    [Test]
+    public void Trim_quarter_uses_requested_kind()
+    {
+        var value = new System.DateTime(2024, 5, 20, 12, 0, 0, DateTimeKind.Local);
+
+        System.DateTime result = value.Trim(UnitOfTime.Quarter, DateTimeKind.Utc);
+
+        result.Should().Be(new System.DateTime(2024, 4, 1, 0, 0, 0, DateTimeKind.Utc));
+    }
+
+    [Test]
+    public void ToTzOffset_uses_the_supplied_utc_instant_for_dst()
+    {
+        TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+        var afterDstTransition = new System.DateTime(2023, 3, 12, 7, 30, 0, DateTimeKind.Utc);
+
+        TimeSpan result = afterDstTransition.ToTzOffset(easternZone);
+
+        result.Should().Be(TimeSpan.FromHours(-4));
+    }
+
+    [Test]
+    public void Add_fractional_quarter_preserves_fractional_months()
+    {
+        var value = new System.DateTime(2024, 1, 1);
+
+        System.DateTime result = value.Add(0.5, UnitOfTime.Quarter);
+
+        result.Should().Be(new System.DateTime(2024, 2, 15, 12, 0, 0));
+    }
+
+    [Test]
+    public void ToAge_returns_negative_calendar_units_for_future_values()
+    {
+        var now = new System.DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        System.DateTime future = now.AddMonths(2);
+
+        double result = future.ToAge(UnitOfTime.Month, now);
+
+        result.Should().Be(-2);
+    }
+
+    [Test]
     public void Trim_should_trim()
     {
         System.DateTime utcNow = System.DateTime.UtcNow;

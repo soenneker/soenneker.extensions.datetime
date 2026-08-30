@@ -25,7 +25,7 @@ public static class DateTimeExtension
     /// This could be useful for displaying times in a uniform format while accounting for different time zones.
     /// Note that the returned <see cref="DateTime"/> does not represent the original UTC time but its equivalent in the specified time zone, marked as UTC.
     /// </remarks>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="tzInfo"/> is null.</exception>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="tzInfo"/> is null.</exception>
     [Pure]
     public static System.DateTime ToTz(this System.DateTime utcTime, TimeZoneInfo tzInfo)
     {
@@ -62,18 +62,19 @@ public static class DateTimeExtension
     }
 
     /// <summary>
-    /// Calculates the age in hours between the specified date and the current date and time.
+    /// Calculates the signed difference from the specified date to a reference UTC time in the requested unit.
     /// </summary>
     /// <param name="fromDateTime">The specified date and time.</param>
-    /// <param name="unitOfTime"></param>
+    /// <param name="unitOfTime">The unit used for the result.</param>
     /// <param name="utcNow">The current date and time in UTC. If not provided, the current UTC date and time will be used.</param>
-    /// <returns>The age in hours.</returns>
-    /// <exception cref="NotSupportedException"></exception>
+    /// <returns>A positive value for a past date and a negative value for a future date.</returns>
+    /// <exception cref="NotSupportedException">The requested unit is not supported.</exception>
     [Pure]
     public static double ToAge(this System.DateTime fromDateTime, UnitOfTime unitOfTime, System.DateTime? utcNow = null)
     {
         utcNow ??= System.DateTime.UtcNow;
         TimeSpan timeSpan = (utcNow - fromDateTime).Value;
+        int calendarDirection = timeSpan < TimeSpan.Zero ? -1 : 1;
 
         return unitOfTime.Value switch
         {
@@ -88,9 +89,9 @@ public static class DateTimeExtension
             UnitOfTime.WeekValue => timeSpan.TotalDays / 7D,
 
             // calendar-exact (whole + fractional based on actual next interval length)
-            UnitOfTime.MonthValue => MonthsBetween(fromDateTime, utcNow.Value),
-            UnitOfTime.QuarterValue => QuartersBetween(fromDateTime, utcNow.Value),
-            UnitOfTime.YearValue => YearsBetween(fromDateTime, utcNow.Value),
+            UnitOfTime.MonthValue => calendarDirection * MonthsBetween(fromDateTime, utcNow.Value),
+            UnitOfTime.QuarterValue => calendarDirection * QuartersBetween(fromDateTime, utcNow.Value),
+            UnitOfTime.YearValue => calendarDirection * YearsBetween(fromDateTime, utcNow.Value),
 
             _ => throw new NotSupportedException("UnitOfTime is not supported for this method")
         };
@@ -241,11 +242,11 @@ public static class DateTimeExtension
     /// This method adjusts a <see cref="System.DateTime"/> object to the nearest lower value of the specified precision. For example, trimming to <see cref="UnitOfTime.Minute"/> 
     /// will result in a <see cref="System.DateTime"/> object set to the beginning of the minute, with seconds and milliseconds set to zero.
     /// The method supports various levels of precision, such as Year, Month, Day, Hour, Minute, and Second. Any time components finer than the specified precision are set to zero.
-    /// The resulting <see cref="System.DateTime"/> is always returned with its <see cref="System.DateTime.Kind"/> property set to <see cref="DateTimeKind.Utc"/>.
+    /// The resulting <see cref="System.DateTime"/> preserves the input kind unless <paramref name="dateTimeKind"/> is supplied.
     /// </remarks>
     /// <param name="dateTime">The <see cref="System.DateTime"/> to trim.</param>
     /// <param name="unitOfTime">The precision to which the <paramref name="dateTime"/> should be trimmed. This should be one of the values defined in <see cref="UnitOfTime"/>.</param>
-    /// <param name="dateTimeKind"></param>
+    /// <param name="dateTimeKind">The kind to assign to the result; null preserves the input kind.</param>
     /// <returns>A new <see cref="System.DateTime"/> object trimmed to the specified <paramref name="unitOfTime"/>.</returns>
     [Pure]
     public static System.DateTime Trim(this System.DateTime dateTime, UnitOfTime unitOfTime, DateTimeKind? dateTimeKind = null)
@@ -301,7 +302,7 @@ public static class DateTimeExtension
                 // Determine the start month of the quarter
                 int quarterNumber = (dateTime.Month - 1) / 3;
                 int startMonthOfQuarter = quarterNumber * 3 + 1;
-                trimmed = new System.DateTime(dateTime.Year, startMonthOfQuarter, 1, 0, 0, 0, 0, dateTime.Kind);
+                trimmed = new System.DateTime(dateTime.Year, startMonthOfQuarter, 1, 0, 0, 0, 0, dateTimeKind.Value);
                 break;
             case UnitOfTime.YearValue:
                 trimmed = new System.DateTime(dateTime.Year, 1, 1, 0, 0, 0, 0, dateTimeKind.Value);
@@ -371,17 +372,9 @@ public static class DateTimeExtension
             case UnitOfTime.TickValue:
                 return dateTime.AddTicks((long)value);
             case UnitOfTime.NanosecondValue:
-                double totalTicksForNanoseconds = value / _nanosecondsPerTick;
-                var wholeTicksForNanoseconds = (long)totalTicksForNanoseconds;
-                double fractionalTicksForNanoseconds = totalTicksForNanoseconds - wholeTicksForNanoseconds;
-                dateTime = dateTime.AddTicks(wholeTicksForNanoseconds);
-                return dateTime.AddTicks((long)(fractionalTicksForNanoseconds * _nanosecondsPerTick));
+                return dateTime.AddTicks((long)(value / _nanosecondsPerTick));
             case UnitOfTime.MicrosecondValue:
-                double totalTicksForMicroseconds = value * _ticksPerMicrosecond;
-                var wholeTicksForMicroseconds = (long)totalTicksForMicroseconds;
-                double fractionalTicksForMicroseconds = totalTicksForMicroseconds - wholeTicksForMicroseconds;
-                dateTime = dateTime.AddTicks(wholeTicksForMicroseconds);
-                return dateTime.AddTicks((long)(fractionalTicksForMicroseconds * _ticksPerMicrosecond));
+                return dateTime.AddTicks((long)(value * _ticksPerMicrosecond));
             case UnitOfTime.MillisecondValue:
                 return dateTime.AddMilliseconds(value);
             case UnitOfTime.SecondValue:
@@ -400,14 +393,14 @@ public static class DateTimeExtension
                 dateTime = dateTime.AddMonths(wholeMonths);
                 return dateTime.AddDays(fractionalMonths * System.DateTime.DaysInMonth(dateTime.Year, dateTime.Month));
             case UnitOfTime.QuarterValue:
-                return dateTime.AddMonths((int)(value * 3));
+                return dateTime.Add(value * 3, UnitOfTime.Month);
             case UnitOfTime.YearValue:
                 var wholeYears = (int)value;
                 double fractionalYears = value - wholeYears;
                 dateTime = dateTime.AddYears(wholeYears);
                 return dateTime.AddDays(fractionalYears * (System.DateTime.IsLeapYear(dateTime.Year) ? 366 : 365));
             case UnitOfTime.DecadeValue:
-                return dateTime.AddYears((int)(value * 10));
+                return dateTime.Add(value * 10, UnitOfTime.Year);
             default:
                 throw new ArgumentOutOfRangeException(nameof(unitOfTime), $"Unsupported UnitOfTime: {unitOfTime.Name}");
         }
@@ -591,7 +584,7 @@ public static class DateTimeExtension
     [Pure]
     public static TimeSpan ToTzOffset(this System.DateTime utcNow, TimeZoneInfo timeZoneInfo)
     {
-        return timeZoneInfo.GetUtcOffset(utcNow.ToTz(timeZoneInfo));
+        return timeZoneInfo.GetUtcOffset(utcNow.ToUtcKind());
     }
 
     /// <summary>
@@ -600,12 +593,11 @@ public static class DateTimeExtension
     /// <remarks>
     /// This method calculates the UTC equivalent of a specified hour in a given time zone, considering the time zone's offset from UTC, including any daylight saving time adjustments.
     /// It is designed to handle time zone differences and daylight saving time, ensuring that the conversion always produces a valid hour in the 24-hour format.
-    /// Special Case: Due to the modulo operation, a conversion can result in 24, which represents midnight at the start of a new day.
     /// </remarks>
     /// <param name="utcNow">The current UTC date and time, used to determine the time zone's current offset, including daylight saving time.</param>
     /// <param name="tzHour">The hour in the specified time zone to be converted to UTC. Must be in 24-hour format.</param>
     /// <param name="timeZoneInfo">The time zone of the original hour.</param>
-    /// <returns>The hour in UTC after conversion. This is always a positive number in the 24-hour format, where 24 may indicate midnight.</returns>
+    /// <returns>The UTC hour in the range 0 through 23.</returns>
     [Pure]
     public static int ToUtcHoursFromTz(this System.DateTime utcNow, int tzHour, TimeZoneInfo timeZoneInfo)
     {
