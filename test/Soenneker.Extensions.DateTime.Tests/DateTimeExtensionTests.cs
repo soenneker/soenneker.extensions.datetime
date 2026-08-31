@@ -2,6 +2,7 @@ using AwesomeAssertions;
 using Soenneker.Enums.UnitOfTime;
 using Soenneker.Tests.Unit;
 using System;
+using System.Globalization;
 
 namespace Soenneker.Extensions.DateTime.Tests;
 
@@ -56,6 +57,37 @@ public class DateTimeExtensionTests : UnitTest
         System.DateTime result = value.Add(0.5, UnitOfTime.Quarter);
 
         result.Should().Be(new System.DateTime(2024, 2, 15, 12, 0, 0));
+    }
+
+    [Test]
+    public void ToNextBusinessDate_from_friday_returns_monday_and_preserves_time_and_kind()
+    {
+        var friday = new System.DateTime(2024, 6, 14, 12, 30, 0, DateTimeKind.Utc);
+
+        System.DateTime result = friday.ToNextBusinessDate(CultureInfo.InvariantCulture);
+
+        result.Should().Be(new System.DateTime(2024, 6, 17, 12, 30, 0, DateTimeKind.Utc));
+    }
+
+    [Test]
+    public void ToPreviousBusinessDate_from_monday_returns_friday_and_preserves_time_and_kind()
+    {
+        var monday = new System.DateTime(2024, 6, 17, 12, 30, 0, DateTimeKind.Utc);
+
+        System.DateTime result = monday.ToPreviousBusinessDate(CultureInfo.InvariantCulture);
+
+        result.Should().Be(new System.DateTime(2024, 6, 14, 12, 30, 0, DateTimeKind.Utc));
+    }
+
+    [Test]
+    public void BusinessDate_methods_support_friday_saturday_weekends()
+    {
+        CultureInfo culture = CultureInfo.GetCultureInfo("ar-SA");
+        var thursday = new System.DateTime(2024, 6, 13, 12, 30, 0, DateTimeKind.Utc);
+        var sunday = new System.DateTime(2024, 6, 16, 12, 30, 0, DateTimeKind.Utc);
+
+        thursday.ToNextBusinessDate(culture).Should().Be(sunday);
+        sunday.ToPreviousBusinessDate(culture).Should().Be(thursday);
     }
 
     [Test]

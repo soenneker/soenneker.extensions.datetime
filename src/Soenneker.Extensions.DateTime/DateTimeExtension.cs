@@ -1,6 +1,8 @@
 using Soenneker.Enums.UnitOfTime;
+using Soenneker.Extensions.CultureInfos;
 using System;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Soenneker.Extensions.DateTime;
@@ -233,6 +235,76 @@ public static class DateTimeExtension
             quarters--;
 
         return quarters;
+    }
+
+    /// <summary>
+    /// Returns the next business date, strictly after the supplied value, skipping weekend days defined by the supplied culture.
+    /// </summary>
+    /// <param name="dateTime">The starting date and time.</param>
+    /// <param name="culture">
+    /// The culture used to determine weekend days. If <see langword="null"/>, <see cref="CultureInfo.CurrentCulture"/> is used.
+    /// </param>
+    /// <returns>The next business date, with the original time and <see cref="DateTimeKind"/> preserved.</returns>
+    [Pure]
+    public static System.DateTime ToNextBusinessDate(this System.DateTime dateTime, CultureInfo? culture = null)
+    {
+        CultureInfo resolvedCulture = culture ?? CultureInfo.CurrentCulture;
+        return dateTime.AddDays(GetBusinessDateDelta(dateTime.DayOfWeek, next: true, resolvedCulture));
+    }
+
+    /// <summary>
+    /// Returns the previous business date, strictly before the supplied value, skipping weekend days defined by the supplied culture.
+    /// </summary>
+    /// <param name="dateTime">The starting date and time.</param>
+    /// <param name="culture">
+    /// The culture used to determine weekend days. If <see langword="null"/>, <see cref="CultureInfo.CurrentCulture"/> is used.
+    /// </param>
+    /// <returns>The previous business date, with the original time and <see cref="DateTimeKind"/> preserved.</returns>
+    [Pure]
+    public static System.DateTime ToPreviousBusinessDate(this System.DateTime dateTime, CultureInfo? culture = null)
+    {
+        CultureInfo resolvedCulture = culture ?? CultureInfo.CurrentCulture;
+        return dateTime.AddDays(GetBusinessDateDelta(dateTime.DayOfWeek, next: false, resolvedCulture));
+    }
+
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int GetBusinessDateDelta(DayOfWeek day, bool next, CultureInfo culture)
+    {
+        bool usesFriSatWeekend = culture.UsesFriSatWeekend();
+
+        if (next)
+        {
+            if (usesFriSatWeekend)
+                return day switch
+                {
+                    DayOfWeek.Thursday => 3,
+                    DayOfWeek.Friday => 2,
+                    _ => 1
+                };
+
+            return day switch
+            {
+                DayOfWeek.Friday => 3,
+                DayOfWeek.Saturday => 2,
+                _ => 1
+            };
+        }
+
+        if (usesFriSatWeekend)
+            return day switch
+            {
+                DayOfWeek.Sunday => -3,
+                DayOfWeek.Saturday => -2,
+                _ => -1
+            };
+
+        return day switch
+        {
+            DayOfWeek.Monday => -3,
+            DayOfWeek.Sunday => -2,
+            _ => -1
+        };
     }
 
     /// <summary>
