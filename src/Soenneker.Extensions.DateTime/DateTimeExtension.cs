@@ -344,17 +344,16 @@ public static class DateTimeExtension
                 break;
             }
             case UnitOfTime.SecondValue:
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, 0,
-                    dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Ticks - dateTime.Ticks % TimeSpan.TicksPerSecond, dateTimeKind.Value);
                 break;
             case UnitOfTime.MinuteValue:
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Ticks - dateTime.Ticks % TimeSpan.TicksPerMinute, dateTimeKind.Value);
                 break;
             case UnitOfTime.HourValue:
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Ticks - dateTime.Ticks % TimeSpan.TicksPerHour, dateTimeKind.Value);
                 break;
             case UnitOfTime.DayValue:
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value);
+                trimmed = new System.DateTime(dateTime.Ticks - dateTime.Ticks % TimeSpan.TicksPerDay, dateTimeKind.Value);
                 break;
             case UnitOfTime.WeekValue: // Considering Monday is the first day - ISO 8601
             {
@@ -364,7 +363,7 @@ public static class DateTimeExtension
                     daysToSubtract += 7;
                 }
 
-                trimmed = new System.DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, 0, dateTimeKind.Value).AddDays(-daysToSubtract);
+                trimmed = new System.DateTime(dateTime.Ticks - dateTime.Ticks % TimeSpan.TicksPerDay, dateTimeKind.Value).AddDays(-daysToSubtract);
                 break;
             }
             case UnitOfTime.MonthValue:
